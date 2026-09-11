@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<!--
+  template: dashboard.html
+  用途: PC 仪表盘模板（KPI 卡片 + 折线/柱状/饼 三图表 + Top10 排行榜）
+
+  特性：
+  - 布局：整页自然滚动（与 list / form / detail 的 100vh 固定框架不同）
+    → 图表多时向下浏览更自然，不做内部滚动区嵌套
+  - 页头：标题 + 时间范围快捷切换（今日 / 近7天 / 近30天，静默切换，不弹 toast）+ 自定义日期区间 + 刷新
+  - KPI × 4：数值 + 环比（涨绿跌红，带箭头）+ 副标题说明
+  - 图表：折线（趋势，全宽）/ 柱状（分布，半宽）/ 饼（占比，半宽）
+  - Top 10 排行榜 el-table，带名次徽标与进度条
+  - 图表随容器尺寸变化自动重绘：每个实例注册 ResizeObserver + window.resize，
+    卸载时统一 dispose 并 disconnect（viewer 里拖拽改栏宽 / 收起侧栏时不会变形）
+  - 所有可见文案默认中文（日期 / 表格空态由 zh-cn-locale.js 提供）
+
+  使用方式: 拷贝本文件到 pages/<id>.html，再修改：
+    - <title>       页面标题
+    - pageTitle     页头显示的标题文案
+    - kpiItems      4 个 KPI 卡片
+    - mockData      三个图表 + 排行榜的数据源（替换为真实接口返回）
+    - buildOptions  ECharts 配置（改图表类型 / 配色 / 轴 在这里）
+
+  注意：不要在 <div id="app"> 内部写 {{XXX}} 形式的占位符 —— 那是 Vue 的插值语法，
+        会被当作表达式求值并抛 "XXX is not defined"。页面标题改 <title> 与 pageTitle。
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{PAGE_TITLE}}</title>
+  <link rel="stylesheet" href="../assets/scaffold-base.css" />
+  <link rel="stylesheet" href="../assets/element-plus.css" />
+  <script src="../assets/vue.global.prod.js"></script>
+  <script src="../assets/element-plus.full.min.js"></script>
+  <script src="../assets/icons-vue.iife.min.js"></script>
+  <script src="../assets/echarts.min.js"></script>
+  <script src="../assets/viewer-bridge.js"></script>
+  <!-- 中文语言包：element-plus.full.min.js 只打了英文，不引这个日期选择器会显示英文 -->
+  <script src="../assets/zh-cn-locale.js"></script>
+  <!-- scaffold 通用工具：stamp / registerIcons -->
+  <script src="../assets/scaffold-helpers.js"></script>
+  <style>
+    /* 整页自然滚动（本模板不用 100vh 固定框架） */
+    #app { padding: 12px; }
+    /* 页头：标题 + 时间范围筛选 + 刷新 */
+    .page-header {
+      background: #fff;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    /* el-form-item 在页头里是 daterange 的纯包装（不需要 label/form 上下文），
+       默认有 margin-bottom / 内部 padding 会让它比兄弟节点高出一截 */
+    .page-header .el-form-item {
+      margin: 0;
+      padding: 0;
+    }
+    .page-header .el-form-item__content { line-height: 1; }
+    .page-header .title { font-size: 16px; font-weight: 600; color: #303133; }
+    .page-header .sub { font-size: 12px; color: #909399; }
+    .page-header .spacer { flex: 1; }
+    /* KPI 卡片 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .kpi-card {
+      background: #fff;
+      padding: 16px 18px;
+      border-radius: 4px;
+    }
+    .kpi-card .label { color: #909399; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+    .kpi-card .value {
+      font-size: 26px;
+      font-weight: 600;
+      color: #303133;
+      margin-top: 6px;
+      line-height: 1.2;
+    }
+    .kpi-card .value .unit { font-size: 13px; font-weight: 400; color: #909399; margin-left: 2px; }
+    .kpi-card .foot {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #ebeef5;
+      font-size: 12px;
+      color: #909399;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .kpi-card .delta { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; }
+    .kpi-card .delta.up { color: #67c23a; }    /* 涨 = 绿 */
+    .kpi-card .delta.down { color: #f56c6c; }  /* 跌 = 红 */
+    /* 图表卡片 */
+    .chart-row {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .chart-row.one { grid-template-columns: 1fr; }
+    .chart-row.two { grid-template-columns: repeat(2, 1fr); }
+    .chart-card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 12px 16px 16px;
+    }
+    .chart-card .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0 0 8px;
+      padding-left: 8px;
+      border-left: 3px solid #409eff;
+      line-height: 16px;
+      display: flex;
+      align-items: center;
+    }
+    .chart-card .card-title .spacer { flex: 1; }
+    .chart-card .card-title .hint { font-size: 12px; font-weight: 400; color: #909399; }
+    /* 图表容器必须有确定高度，否则 echarts.init 拿到 0 高度不渲染 */
+    .chart-box { height: 300px; width: 100%; }
+    .chart-box.tall { height: 340px; }
+    /* 排行榜卡片 */
+    .rank-card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 12px 16px 16px;
+    }
+    .rank-card .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0 0 12px;
+      padding-left: 8px;
+      border-left: 3px solid #409eff;
+      line-height: 16px;
+    }
+    /* 名次徽标：前三名着色 */
+    .rank-badge {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #f0f2f5;
+      color: #909399;
+    }
+    .rank-badge.top1 { background: #f56c6c; color: #fff; }
+    .rank-badge.top2 { background: #e6a23c; color: #fff; }
+    .rank-badge.top3 { background: #409eff; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- el-config-provider 提供中文 locale，覆盖日期选择器 / 表格空态 的默认英文文案 -->
+    <el-config-provider :locale="zhCnLocale">
+
+      <!-- 页头：标题 + 时间范围 + 刷新 -->
+      <div class="page-header">
+        <span class="title">{{ pageTitle }}</span>
+        <span class="sub">数据更新于 {{ updatedAt }}</span>
+        <span class="spacer"></span>
+        <el-radio-group v-model="range" @change="onRangeChange">
+          <el-radio-button value="today">今日</el-radio-button>
+          <el-radio-button value="7d">近 7 天</el-radio-button>
+          <el-radio-button value="30d">近 30 天</el-radio-button>
+        </el-radio-group>
+        <!-- 用 el-form-item 包裹 daterange：跟列表页「下单日期」结构一致，
+             才能让 element-plus 2.8.8 date-picker cell 面板正确渲染日期数字 -->
+        <el-form-item>
+          <el-date-picker
+            v-model="customRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始"
+            end-placeholder="结束"
+            value-format="YYYY-MM-DD"
+            style="width:260px"
+            @change="onCustomRangeChange" />
+        </el-form-item>
+        <el-button circle @click="onRefresh">
+          <el-icon><Refresh /></el-icon>
+        </el-button>
+      </div>
+
+      <!-- KPI × 4 -->
+      <div class="kpi-grid">
+        <div class="kpi-card" v-for="k in kpiItems" :key="k.label">
+          <div class="label">
+            {{ k.label }}
+            <el-tooltip v-if="k.tip" :content="k.tip" placement="top">
+              <el-icon color="#c0c4cc"><QuestionFilled /></el-icon>
+            </el-tooltip>
+          </div>
+          <div class="value">{{ k.value }}<span class="unit" v-if="k.unit">{{ k.unit }}</span></div>
+          <div class="foot">
+            <span class="delta" :class="k.delta >= 0 ? 'up' : 'down'">
+              <el-icon><component :is="k.delta >= 0 ? 'CaretTop' : 'CaretBottom'" /></el-icon>
+              {{ Math.abs(k.delta) }}%
+            </span>
+            <span>{{ k.deltaLabel }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 折线图：全宽趋势 -->
+      <div class="chart-row one">
+        <div class="chart-card">
+          <h3 class="card-title">
+            趋势分析
+            <span class="spacer"></span>
+            <span class="hint">单位：件 / 元</span>
+          </h3>
+          <div class="chart-box tall" ref="trendRef"></div>
+        </div>
+      </div>
+
+      <!-- 柱状图 + 饼图：各占一半 -->
+      <div class="chart-row two">
+        <div class="chart-card">
+          <h3 class="card-title">分布对比</h3>
+          <div class="chart-box" ref="barRef"></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="card-title">构成占比</h3>
+          <div class="chart-box" ref="pieRef"></div>
+        </div>
+      </div>
+
+      <!-- Top 10 排行榜 -->
+      <div class="rank-card">
+        <h3 class="card-title">Top 10 排行榜</h3>
+        <!-- 注意：el-table-column 必须用显式 </el-table-column> 闭合；Element Plus 2.8.8 +
+             Vue 3.5 在自闭合写法下会把后续列错误地嵌套进前一列 -->
+        <el-table :data="mockData.rank" border stripe style="width:100%">
+          <el-table-column label="名次" width="70" align="center">
+            <template #default="{ $index }">
+              <span class="rank-badge" :class="'top' + ($index + 1)">{{ $index + 1 }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="name" label="名称" min-width="160" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="category" label="分类" width="120"></el-table-column>
+          <el-table-column prop="count" label="数量" width="100" align="right" sortable></el-table-column>
+          <!-- amount 是 '¥ 198,400' 字符串，加 sort-method 按数值比较（否则字符串按字典序排错） -->
+          <el-table-column prop="amount" label="金额" width="130" align="right" sortable
+            :sort-method="(a, b) => parseFloat(a.amount.replace(/[^0-9.]/g, '')) - parseFloat(b.amount.replace(/[^0-9.]/g, ''))"></el-table-column>
+          <el-table-column label="占比" min-width="180">
+            <template #default="{ row }">
+              <el-progress :percentage="row.percent" :stroke-width="10" />
+            </template>
+          </el-table-column>
+          <el-table-column label="环比" width="100" align="right">
+            <template #default="{ row }">
+              <span :style="{ color: row.delta >= 0 ? '#67c23a' : '#f56c6c' }">
+                {{ row.delta >= 0 ? '+' : '' }}{{ row.delta }}%
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+    </el-config-provider>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, onMounted, onBeforeUnmount, nextTick } = Vue;
+    const { Refresh, QuestionFilled, CaretTop, CaretBottom } = ElementPlusIconsVue;
+    const { stamp, registerIcons } = window.ScaffoldHelpers;
+    // 中文 locale：由 ../assets/zh-cn-locale.js 提供
+    const zhCnLocale = window.ZH_CN_LOCALE;
+
+    const app = createApp({
+      setup() {
+        const pageTitle = ref('{{PAGE_TITLE}}');
+        const range = ref('7d');
+        const customRange = ref([]);
+        const updatedAt = ref('—');
+
+        /* ========== KPI 卡片（可替换为接口数据）========== */
+        const kpiItems = ref([
+          { label: '今日订单', value: '1,286', unit: '单', delta: 12.4, deltaLabel: '较昨日', tip: '统计口径：支付成功的订单数' },
+          { label: '活跃用户', value: '3,420', unit: '人', delta: 5.8, deltaLabel: '较昨日' },
+          { label: '转化率', value: '4.6', unit: '%', delta: -1.2, deltaLabel: '较昨日', tip: '下单用户 / 访问用户' },
+          { label: '异常数', value: '7', unit: '条', delta: -30.0, deltaLabel: '较昨日' },
+        ]);
+
+        /* ========== 图表 + 排行榜数据源（替换为真实接口返回）========== */
+        const mockData = reactive({
+          trend: {
+            days: ['07-24', '07-25', '07-26', '07-27', '07-28', '07-29', '07-30'],
+            orders: [820, 932, 901, 934, 1290, 1330, 1286],
+            amount: [12400, 14200, 13800, 14100, 19800, 20500, 19600],
+          },
+          bar: {
+            categories: ['北京', '上海', '广州', '深圳', '杭州', '成都'],
+            current: [320, 302, 241, 334, 190, 210],
+            previous: [280, 290, 260, 300, 175, 168],
+          },
+          pie: [
+            { name: '自然流量', value: 4200 },
+            { name: '广告投放', value: 3100 },
+            { name: '私域', value: 1800 },
+            { name: '分销', value: 1200 },
+            { name: '其他', value: 620 },
+          ],
+          rank: [
+            { name: '示例项目 A', category: '类型 A', count: 1286, amount: '¥ 198,400', percent: 100, delta: 12.4 },
+            { name: '示例项目 B', category: '类型 B', count: 1120, amount: '¥ 172,800', percent: 87, delta: 8.1 },
+            { name: '示例项目 C', category: '类型 A', count: 964, amount: '¥ 149,200', percent: 75, delta: -3.5 },
+            { name: '示例项目 D', category: '类型 C', count: 830, amount: '¥ 128,600', percent: 65, delta: 5.2 },
+            { name: '示例项目 E', category: '类型 B', count: 742, amount: '¥ 114,900', percent: 58, delta: 2.0 },
+            { name: '示例项目 F', category: '类型 A', count: 655, amount: '¥ 101,300', percent: 51, delta: -8.7 },
+            { name: '示例项目 G', category: '类型 C', count: 588, amount: '¥ 90,800', percent: 46, delta: 1.4 },
+            { name: '示例项目 H', category: '类型 B', count: 502, amount: '¥ 77,600', percent: 39, delta: -0.6 },
+            { name: '示例项目 I', category: '类型 A', count: 431, amount: '¥ 66,700', percent: 34, delta: 4.3 },
+            { name: '示例项目 J', category: '类型 C', count: 376, amount: '¥ 58,200', percent: 29, delta: -2.1 },
+          ],
+        });
+
+        /* ========== ECharts 配置：改图表类型 / 配色 / 轴 在这里 ========== */
+        const buildOptions = () => ({
+          trend: {
+            tooltip: { trigger: 'axis' },
+            // 图例放最上一行，grid.top 留够 64px，轴名 nameGap 20 → 轴名落在 y≈44，
+            // 与图例（y 0~20）错开。否则右轴名「成交额」会和图例项「成交额」叠在一起。
+            legend: { data: ['订单量', '成交额'], right: 0, top: 0 },
+            grid: { left: 8, right: 8, bottom: 8, top: 64, containLabel: true },
+            xAxis: { type: 'category', boundaryGap: false, data: mockData.trend.days },
+            yAxis: [
+              { type: 'value', name: '订单量', nameGap: 20 },
+              { type: 'value', name: '成交额', nameGap: 20, splitLine: { show: false } },
+            ],
+            series: [
+              {
+                name: '订单量', type: 'line', smooth: true, data: mockData.trend.orders,
+                itemStyle: { color: '#409eff' },
+                areaStyle: {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(64,158,255,.28)' },
+                    { offset: 1, color: 'rgba(64,158,255,0)' },
+                  ]),
+                },
+              },
+              {
+                name: '成交额', type: 'line', smooth: true, yAxisIndex: 1,
+                data: mockData.trend.amount, itemStyle: { color: '#67c23a' },
+              },
+            ],
+          },
+          bar: {
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            legend: { data: ['本期', '上期'], right: 0, top: 0 },
+            grid: { left: 8, right: 8, bottom: 8, top: 40, containLabel: true },
+            xAxis: { type: 'category', data: mockData.bar.categories },
+            yAxis: { type: 'value' },
+            series: [
+              { name: '本期', type: 'bar', barMaxWidth: 28, data: mockData.bar.current, itemStyle: { color: '#409eff' } },
+              { name: '上期', type: 'bar', barMaxWidth: 28, data: mockData.bar.previous, itemStyle: { color: '#c8d9ec' } },
+            ],
+          },
+          pie: {
+            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+            legend: { orient: 'vertical', right: 8, top: 'middle' },
+            series: [{
+              type: 'pie',
+              radius: ['45%', '68%'],
+              center: ['38%', '52%'],
+              avoidLabelOverlap: true,
+              itemStyle: { borderColor: '#fff', borderWidth: 2 },
+              label: { show: false },
+              data: mockData.pie,
+              color: ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399'],
+            }],
+          },
+        });
+
+        /* ========== 图表实例管理 ==========
+           关键：viewer 支持拖拽改栏宽 / 收起侧栏，容器尺寸会变但 window.resize 不一定触发。
+           所以每个实例同时挂 ResizeObserver（容器级）和 window.resize（窗口级），
+           卸载时统一 dispose + disconnect，避免内存泄漏。 */
+        const trendRef = ref(null);
+        const barRef = ref(null);
+        const pieRef = ref(null);
+        const charts = [];          // [{ inst, ro }]
+
+        const mountChart = (el, option) => {
+          if (!el) return null;
+          const inst = echarts.init(el);
+          inst.setOption(option);
+          let ro = null;
+          if (typeof ResizeObserver !== 'undefined') {
+            ro = new ResizeObserver(() => inst.resize());
+            ro.observe(el);
+          }
+          charts.push({ inst, ro });
+          return inst;
+        };
+
+        const onWindowResize = () => charts.forEach(c => c.inst.resize());
+
+        const stamp = () => {
+          const d = new Date();
+          const p = (n) => String(n).padStart(2, '0');
+          return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        };
+
+        // 重新 setOption（数据变化时调用，不销毁实例）
+        const applyOptions = () => {
+          const opts = buildOptions();
+          const keys = ['trend', 'bar', 'pie'];
+          charts.forEach((c, i) => c.inst.setOption(opts[keys[i]], true));
+        };
+
+        onMounted(async () => {
+          updatedAt.value = stamp();
+          // 等 DOM 布局稳定再 init，否则容器高度可能还是 0
+          await nextTick();
+          const opts = buildOptions();
+          mountChart(trendRef.value, opts.trend);
+          mountChart(barRef.value, opts.bar);
+          mountChart(pieRef.value, opts.pie);
+          window.addEventListener('resize', onWindowResize);
+        });
+
+        onBeforeUnmount(() => {
+          window.removeEventListener('resize', onWindowResize);
+          charts.forEach(({ inst, ro }) => {
+            if (ro) ro.disconnect();
+            inst.dispose();
+          });
+          charts.length = 0;
+        });
+
+        /* ========== 交互（原型演示：切换时间范围静默刷新，只在「刷新」按钮上保留 toast）========== */
+        const onRangeChange = (val) => {
+          customRange.value = [];
+          updatedAt.value = stamp();
+          applyOptions();
+        };
+        const onCustomRangeChange = (val) => {
+          if (!val || !val.length) return;
+          range.value = '';
+          updatedAt.value = stamp();
+          applyOptions();
+        };
+        const onRefresh = () => {
+          updatedAt.value = stamp();
+          applyOptions();
+          ElMessage.success('已刷新');
+        };
+
+        return {
+          pageTitle, range, customRange, updatedAt,
+          kpiItems, mockData,
+          trendRef, barRef, pieRef,
+          onRangeChange, onCustomRangeChange, onRefresh,
+          Refresh, QuestionFilled,
+          zhCnLocale,
+        };
+      }
+    });
+    app.use(ElementPlus);
+    registerIcons(app, ['Refresh', 'QuestionFilled', 'CaretTop', 'CaretBottom'], ElementPlusIconsVue);
+    app.mount('#app');
+  </script>
+</body>
+</html>

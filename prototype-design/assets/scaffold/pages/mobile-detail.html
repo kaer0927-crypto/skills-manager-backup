@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!--
+  template: mobile/detail.html
+  用途: 移动端详情页模板（订单详情 / 客户详情 / 审批详情 等通用详情场景）
+
+  1. 典型场景: 订单详情（默认示例）/ 客户详情 / 审批详情 / 商品详情
+  2. 顶部导航模式: N1' 详情+更多 —— 左返回 + 中标题 + 右 ellipsis 更多下拉
+  3. 底部交互模式: B3 action-bar 操作栏 —— 次操作（plain）+ 主操作（type=primary）
+  4. 数据模型（header / summaryItems / baseInfo / shippingInfo / goodsList / logList）：
+       状态头（渐变色按业务状态变）+ 2×2 摘要 + 基础信息 + 业务信息 + 商品明细 + 操作日志
+  5. 状态映射（statusType → gradient）：
+       primary → 蓝渐变 / success → 绿渐变 / warning → 橙渐变 / danger → 红渐变
+  6. 跳转关系（ROUTES）：见 setup() 顶部 ROUTES 注释
+  7. 4 态约定：loading（van-skeleton）/ error（重试按钮）/ success（默认）
+
+  PM 改模板最小动作清单：
+  1. 改 pageTitle
+  2. 填 ROUTES
+  3. 改 header / summaryItems / baseInfo / shippingInfo / goodsList / logList
+  4. 改 onEdit / onDelete / onCancel / onReorder 逻辑
+
+  禁忌：
+  - 不要在 <div id="app"> 内部写 {{XXX}} 占位符
+  - 不要用 <van-foo ... /> 自闭合
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="device" content="mobile" />
+  <title>详情页</title>
+  <link rel="stylesheet" href="../assets/scaffold-base.css" />
+  <link rel="stylesheet" href="../assets/vant.css" />
+  <script src="../assets/vue.global.prod.js"></script>
+  <script src="../assets/vant.min.js"></script>
+  <script src="../assets/viewer-bridge.js"></script>
+  <style>
+    html, body { background: var(--bg-page); -webkit-font-smoothing: antialiased; }
+    /* 状态头卡片：渐变背景 */
+    .header-card { padding: var(--space-4); color: #fff; border-radius: 0 0 var(--radius-lg) var(--radius-lg); margin-bottom: var(--space-3); }
+    .header-card .title { font-size: var(--fs-xxl); font-weight: 600; line-height: 1.2; }
+    .header-card .meta { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--fs-sm); opacity: .9; }
+    .header-card .code { font-size: var(--fs-sm); opacity: .75; }
+    .header-card .tag { background: rgba(255,255,255,.18); padding: 2px var(--space-2); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+    .header-card .actions { display: flex; gap: var(--space-3); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid rgba(255,255,255,.18); font-size: var(--fs-sm); opacity: .9; }
+    .header-card .actions span { cursor: pointer; }
+    /* 通用卡片容器 */
+    .card { background: var(--bg-card); margin: 0 var(--space-3) var(--space-3); border-radius: var(--radius-md); overflow: hidden; }
+    .card .section-title { padding: var(--space-3) var(--space-4) var(--space-1); font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; }
+    .card .section-title .extra { color: var(--text-secondary); font-weight: 400; font-size: var(--fs-sm); }
+    /* 2 × 2 概要指标条 */
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding: var(--space-3); }
+    .summary-cell { padding: var(--space-2) 0; }
+    .summary-cell .label { color: var(--text-secondary); font-size: var(--fs-sm); }
+    .summary-cell .value { color: var(--text-primary); font-size: var(--fs-xl); font-weight: 600; margin-top: 2px; }
+    /* 商品明细行 */
+    .goods-row { padding: var(--space-3) var(--space-4); display: flex; gap: var(--space-3); align-items: center; }
+    .goods-row + .goods-row { border-top: 1px solid var(--border-color); }
+    .goods-thumb { width: 56px; height: 56px; border-radius: var(--radius-sm); background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: var(--fs-md); font-weight: 600; flex-shrink: 0; }
+    .goods-info { flex: 1; min-width: 0; }
+    .goods-info .name { font-size: var(--fs-md); color: var(--text-primary); font-weight: 500; }
+    .goods-info .meta { color: var(--text-secondary); font-size: var(--fs-sm); margin-top: 2px; }
+    .goods-info .price { color: var(--color-danger); font-weight: 600; margin-top: 2px; font-size: var(--fs-md); }
+    /* B3 操作栏 */
+    .action-bar {
+      position: sticky; bottom: 0; left: 0; right: 0;
+      padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+      background: var(--bg-card); box-shadow: 0 -2px 8px rgba(0,0,0,.04);
+      display: flex; gap: var(--space-2); flex-shrink: 0;
+    }
+    .action-bar .van-button { flex: 1; }
+  </style>
+</head>
+<body>
+  <div id="app" class="is-mobile">
+    <div class="page">
+      <!-- N1' 详情导航：返回 + 标题 + 更多 -->
+      <van-nav-bar :title="pageTitle" left-arrow @click-left="onBack">
+        <template #right>
+          <van-icon name="ellipsis" size="20" @click="showMore = true"></van-icon>
+        </template>
+      </van-nav-bar>
+
+      <!-- loading 态 -->
+      <div v-if="loading" class="page-scroll">
+        <div class="card" style="margin-top:var(--space-4)">
+          <van-skeleton title :row="3" avatar avatar-size="40" avatar-shape="round" style="padding:var(--space-4)"></van-skeleton>
+        </div>
+        <div class="card">
+          <van-skeleton :row="4" style="padding:var(--space-4)"></van-skeleton>
+        </div>
+      </div>
+
+      <!-- error 态 -->
+      <div v-else-if="errorState" class="page-scroll">
+        <van-empty image="error" description="加载失败">
+          <van-button round type="primary" size="small" @click="loadData">重新加载</van-button>
+        </van-empty>
+      </div>
+
+      <!-- success 态 -->
+      <div v-else class="page-scroll">
+        <!-- 状态头卡片：渐变背景 -->
+        <div class="header-card" :style="{ background: header.gradient }">
+          <div class="title">{{ header.title }}</div>
+          <div class="meta">
+            <span class="tag">{{ header.statusText }}</span>
+            <span class="code">{{ header.code }}</span>
+          </div>
+          <div class="actions">
+            <span @click="onCopy">复制订单号</span>
+            <span @click="onShare">分享订单</span>
+          </div>
+        </div>
+
+        <!-- 概要指标条：2 × 2 -->
+        <div class="card">
+          <div class="summary-grid">
+            <div class="summary-cell" v-for="s in summaryItems" :key="s.label">
+              <div class="label">{{ s.label }}</div>
+              <div class="value">{{ s.value }}<span style="font-size:var(--fs-sm);font-weight:400;color:var(--text-secondary);margin-left:2px" v-if="s.unit">{{ s.unit }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 基础信息 -->
+        <div class="card">
+          <div class="section-title">基础信息</div>
+          <van-cell v-for="it in baseInfo" :key="it.label" :title="it.label" :value="it.value"></van-cell>
+        </div>
+
+        <!-- 收货信息 -->
+        <div class="card">
+          <div class="section-title">收货信息</div>
+          <van-cell v-for="it in shippingInfo" :key="it.label" :title="it.label">
+            <template #value>
+              <span :style="{ color: it.color || 'var(--text-primary)' }">{{ it.value }}</span>
+            </template>
+          </van-cell>
+        </div>
+
+        <!-- 商品明细 -->
+        <div class="card">
+          <div class="section-title">
+            <span>商品明细</span>
+            <span class="extra">共 {{ goodsList.length }} 件</span>
+          </div>
+          <div v-for="g in goodsList" :key="g.id" class="goods-row">
+            <div class="goods-thumb">{{ g.thumbText }}</div>
+            <div class="goods-info">
+              <div class="name">{{ g.name }}</div>
+              <div class="meta">规格：{{ g.spec }} × {{ g.qty }}</div>
+              <div class="price">¥ {{ g.price }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作日志 -->
+        <div class="card">
+          <div class="section-title">操作日志</div>
+          <van-cell v-for="log in logList" :key="log.time" :title="log.action">
+            <template #label>
+              <span style="color:var(--text-secondary);font-size:var(--fs-sm)">{{ log.time }} · {{ log.actor }}</span>
+            </template>
+          </van-cell>
+        </div>
+      </div>
+
+      <!-- B3 操作栏 -->
+      <div class="action-bar">
+        <van-button v-if="canCancel" plain @click="onCancel">取消订单</van-button>
+        <van-button v-if="canReorder" plain @click="onReorder">再来一单</van-button>
+        <van-button type="primary" disabled v-if="header.statusType === 'default'">订单已取消</van-button>
+        <van-button type="primary" @click="onPay" v-else-if="header.statusType === 'warning'">立即支付</van-button>
+        <van-button type="primary" @click="onEdit" v-else>编辑订单</van-button>
+      </div>
+
+      <!-- 更多操作下拉 -->
+      <van-action-sheet
+        v-model:show="showMore"
+        :actions="moreActions"
+        cancel-text="取消"
+        @select="onMoreSelect"></van-action-sheet>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+    const app = createApp({
+      setup() {
+        /* ========== PM 改模板最小动作清单 ==========
+           1. 改 pageTitle
+           2. 填 ROUTES
+           3. 改 header / summaryItems / baseInfo / shippingInfo / goodsList / logList
+           4. 改 onEdit / onCancel / onReorder / onPay / onMoreSelect 逻辑 */
+        const pageTitle = ref('详情页');
+        const loading = ref(true);
+        const errorState = ref(false);
+        const showMore = ref(false);
+
+        /* ========== 跳转路由表（PM 改成自己业务的 page id）========== */
+        const ROUTES = {
+          list:    'mobile-list',     // 删除 / 取消后回列表
+          form:    'mobile-form',     // 编辑跳表单
+          detail:  'mobile-detail',   // 当前详情（PM 改名为实际 id）
+        };
+
+        /* ========== 反馈封装 ========== */
+        const toast = {
+          ok:  (m) => showToast && showToast({ message: m, type: 'success' }),
+          err: (m) => showToast && showToast({ message: m, type: 'fail' }),
+        };
+
+        /* ========== 状态头（statusType → gradient 状态映射）========== */
+        const header = reactive({
+          title: '订单 ORD-20260730001',
+          code: 'NO.ORD-20260730001',
+          statusText: '待付款',
+          statusType: 'warning',
+          gradient: 'var(--gradient-warning)',
+        });
+
+        /* ========== 概要指标条 2 × 2 ========== */
+        const summaryItems = ref([
+          { label: '商品件数', value: 3, unit: '件' },
+          { label: '商品数量', value: 5, unit: '件' },
+          { label: '订单金额', value: '¥ 1,059.00' },
+          { label: '实付金额', value: '¥ 999.00' },
+        ]);
+
+        /* ========== 基础信息 ========== */
+        const baseInfo = ref([
+          { label: '订单类型', value: '销售订单' },
+          { label: '支付方式', value: '微信支付' },
+          { label: '下单时间', value: '2026-07-30 10:24' },
+          { label: '订单来源', value: '移动端 App' },
+          { label: '是否加急', value: '否' },
+          { label: '备注', value: '工作日送货，提前电话联系' },
+        ]);
+
+        /* ========== 收货信息 ========== */
+        const shippingInfo = ref([
+          { label: '收货人', value: '张三' },
+          { label: '联系电话', value: '138 0000 0001', color: 'var(--color-primary)' },
+          { label: '收货地址', value: '北京市 / 朝阳区 / 建国路 88 号 SOHO 现代城 A 座 1503 室' },
+        ]);
+
+        /* ========== 商品明细 ========== */
+        const goodsList = ref([
+          { id: 'SKU-001', name: '商品 A · 经典款', spec: '黑色 / L', qty: 2, price: '199.00', thumbText: 'A' },
+          { id: 'SKU-002', name: '商品 B · 限量版', spec: '白色 / M', qty: 1, price: '399.00', thumbText: 'B' },
+          { id: 'SKU-003', name: '商品 C · 配件', spec: '通用', qty: 2, price: '131.00', thumbText: 'C' },
+        ]);
+
+        /* ========== 操作日志 ========== */
+        const logList = ref([
+          { time: '2026-07-30 10:24', actor: '系统', action: '订单创建' },
+          { time: '2026-07-30 10:25', actor: '系统', action: '库存预占成功' },
+          { time: '2026-07-30 11:02', actor: '张三', action: '修改收货地址' },
+        ]);
+
+        /* ========== 操作按钮可见性（按业务状态计算）========== */
+        const canCancel  = computed(() => ['warning', 'primary'].includes(header.statusType));
+        // 再来一单仅对「已完成」订单（退款中 / 已取消再下单语义怪）
+        const canReorder = computed(() => header.statusType === 'success');
+
+        /* ========== 更多操作菜单 ========== */
+        const moreActions = ref([
+          { name: 'copy',   label: '复制订单号' },
+          { name: 'share',  label: '分享订单' },
+          { name: 'export', label: '导出 PDF' },
+          { name: 'complaint', label: '投诉建议' },
+        ]);
+
+        /* ========== 加载模拟 ========== */
+        const loadData = () => {
+          loading.value = true;
+          errorState.value = false;
+          setTimeout(() => { loading.value = false; }, 600);
+        };
+        onMounted(loadData);
+
+        /* ========== 交互（统一走 ROUTES）========== */
+        const goBack  = () => gotoNode(ROUTES.list, () => history.back());
+        const goForm  = () => gotoNode(ROUTES.form);
+        const onBack = goBack;
+        const onEdit = () => { toast.ok('打开编辑表单'); goForm(); };
+
+        const onPay = () => {
+          toast.ok('跳转支付');
+          // PM 接支付 SDK：实际跳转支付页
+        };
+
+        const onReorder = () => {
+          toast.ok('已加入购物车');
+          setTimeout(() => gotoNode(ROUTES.form), 600);
+        };
+
+        const onCancel = () => {
+          (showConfirmDialog ? showConfirmDialog({ title: '取消订单', message: '确认取消该订单？取消后不可恢复。' }) : Promise.reject())
+            .then(() => { header.statusText = '已取消'; header.statusType = 'default'; header.gradient = 'var(--gradient-default)'; toast.ok('已取消订单'); })
+            .catch(() => {});
+        };
+
+        const onCopy = () => toast.ok('订单号已复制：' + header.code);
+        const onShare = () => toast.ok('分享订单：' + header.title);
+        const onMoreSelect = (a) => {
+          showMore.value = false;
+          if (a.name === 'copy') return onCopy();
+          if (a.name === 'share') return onShare();
+          if (a.name === 'export') return toast.ok('已导出 PDF');
+          if (a.name === 'complaint') return toast.ok('打开投诉建议');
+        };
+
+        return {
+          pageTitle, loading, errorState, showMore,
+          header, summaryItems, baseInfo, shippingInfo, goodsList, logList,
+          canCancel, canReorder, moreActions, ROUTES,
+          onBack, onEdit, onPay, onReorder, onCancel, onCopy, onShare, onMoreSelect, loadData,
+        };
+      }
+    });
+    app.use(vant);
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--
+  template: mobile/dashboard.html
+  用途: 移动端仪表盘模板（电商运营首页 / 工作台 / 数据看板 等聚合页场景）
+
+  1. 典型场景: 电商运营首页（默认示例）/ 后台工作台 / 销售个人看板
+  2. 顶部导航模式: N3 主页 —— 左可选位置 / 中标题 / 右铃铛（带 van-badge）
+  3. 底部交互模式: B1 tabbar 底部导航
+  4. 数据模型：
+       kpiItems    2 个 KPI 渐变卡（label / value / unit / delta / deltaLabel / gradient）
+       quickEntries 4 个快捷入口（name / label / icon）
+       recentList  近期活动（id / title / subtitle / thumbText / thumbClass / amount / amountColor）
+  5. 状态映射（thumbClass 配色）：
+       ''        → 蓝渐变（默认）
+       'alt'     → 橙渐变
+       'success' → 绿渐变
+       'danger'  → 红渐变
+  6. 跳转关系（ROUTES）：见 setup() 顶部 ROUTES 注释
+  7. 4 态约定：loading（KPI 显示 —）/ empty（van-empty）/ error（重试按钮）/ success（默认）
+  8. 完全离线：CSS 渐变占位缩略图，无任何外网图（Bug D 已修复）
+
+  PM 改模板最小动作清单：
+  1. 改 pageTitle
+  2. 填 ROUTES
+  3. 改 kpiItems / quickEntries / recentList / tabbarItems
+
+  禁忌：
+  - 不要在 <div id="app"> 内部写 {{XXX}} 占位符
+  - 不要用 <van-foo ... /> 自闭合
+  - 不要引外网图片资源（保持 file:// 完全离线）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="device" content="mobile" />
+  <title>仪表盘</title>
+  <link rel="stylesheet" href="../assets/scaffold-base.css" />
+  <link rel="stylesheet" href="../assets/vant.css" />
+  <script src="../assets/vue.global.prod.js"></script>
+  <script src="../assets/vant.min.js"></script>
+  <script src="../assets/viewer-bridge.js"></script>
+  <style>
+    html, body { background: var(--bg-page); -webkit-font-smoothing: antialiased; }
+    /* KPI 渐变卡 */
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); padding: var(--space-3); }
+    .kpi-card {
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    }
+    .kpi-card .label { font-size: var(--fs-sm); opacity: .88; }
+    .kpi-card .value { font-size: var(--fs-display); font-weight: 600; margin-top: var(--space-1); line-height: 1.2; }
+    .kpi-card .value .unit { font-size: var(--fs-sm); font-weight: 400; opacity: .85; margin-left: 2px; }
+    .kpi-card .delta { display: inline-flex; align-items: center; gap: 2px; margin-top: var(--space-2); padding: 1px var(--space-2); border-radius: var(--radius-sm); font-size: var(--fs-xs); }
+    .kpi-card .delta.up   { background: rgba(255,255,255,.22); }
+    .kpi-card .delta.down { background: rgba(0,0,0,.18); }
+    /* 分组标题 */
+    .section-title { padding: var(--space-1) var(--space-4) var(--space-2); font-size: var(--fs-md); font-weight: 500; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; }
+    .section-title .extra { color: var(--text-secondary); font-size: var(--fs-sm); font-weight: 400; }
+    /* 卡片容器 */
+    .card { background: var(--bg-card); margin: 0 var(--space-3) var(--space-3); border-radius: var(--radius-md); overflow: hidden; }
+    /* 快捷宫格卡片化 */
+    .quick-card { padding: var(--space-2) 0 var(--space-3); }
+    /* 近期活动列表 */
+    .recent-list { background: var(--bg-card); }
+    /* CSS 缩略图占位（替代外网图，file:// 完全离线） */
+    .thumb-placeholder {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: var(--fs-md); font-weight: 600; flex-shrink: 0;
+      background: var(--gradient-primary);
+      margin-right: var(--space-2);
+    }
+    .thumb-placeholder.alt     { background: var(--gradient-warning); }
+    .thumb-placeholder.success { background: var(--gradient-success); }
+    .thumb-placeholder.danger  { background: var(--gradient-danger); }
+  </style>
+</head>
+<body>
+  <div id="app" class="is-mobile">
+    <div class="page">
+      <!-- N3 主页导航：位置 + 标题 + 铃铛 -->
+      <van-nav-bar :title="pageTitle">
+        <template #left>
+          <span style="font-size:var(--fs-md);color:var(--color-primary)">
+            <van-icon name="location-o" size="14"></van-icon>
+            {{ location }}
+          </span>
+        </template>
+        <template #right>
+          <van-badge :content="notifyCount" v-if="notifyCount > 0" max="99">
+            <van-icon name="bell" size="18" @click="onNotify"></van-icon>
+          </van-badge>
+          <van-icon v-else name="bell" size="18" @click="onNotify"></van-icon>
+        </template>
+      </van-nav-bar>
+
+      <!-- error 态 -->
+      <div v-if="errorState" class="page-scroll">
+        <van-empty image="error" description="加载失败">
+          <van-button round type="primary" size="small" @click="loadData">重新加载</van-button>
+        </van-empty>
+      </div>
+
+      <!-- 正常态 -->
+      <div v-else class="page-scroll">
+        <!-- KPI × 2 -->
+        <div class="kpi-row">
+          <div class="kpi-card" v-for="k in kpiItems" :key="k.label"
+               :style="{ background: k.gradient }">
+            <div class="label">{{ k.label }}</div>
+            <div class="value">
+              <span v-if="loading">—</span>
+              <span v-else>{{ k.value }}<span class="unit" v-if="k.unit">{{ k.unit }}</span></span>
+            </div>
+            <div class="delta" :class="k.delta >= 0 ? 'up' : 'down'" v-if="!loading">
+              <van-icon :name="k.delta >= 0 ? 'arrow-up' : 'arrow-down'" size="11"></van-icon>
+              {{ Math.abs(k.delta) }}% {{ k.deltaLabel }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="section-title">
+          <span>快捷入口</span>
+          <span class="extra" @click="onCustomize">管理</span>
+        </div>
+        <div class="card quick-card">
+          <van-grid :column-num="4" :border="false" :gutter="0">
+            <van-grid-item
+              v-for="q in quickEntries"
+              :key="q.name"
+              :icon="q.icon"
+              :text="q.label"
+              @click="onQuick(q)"></van-grid-item>
+          </van-grid>
+        </div>
+
+        <!-- 近期活动 -->
+        <div class="section-title">
+          <span>近期订单</span>
+          <span class="extra" @click="onViewAll">查看全部 ›</span>
+        </div>
+        <div class="card recent-list">
+          <div v-if="recentList.length === 0" style="padding:var(--space-6) 0">
+            <van-empty description="暂无近期订单" :image-size="60"></van-empty>
+          </div>
+          <van-cell
+            v-for="r in recentList"
+            :key="r.id"
+            is-link
+            @click="onRecent(r)">
+            <template #icon>
+              <div class="thumb-placeholder" :class="r.thumbClass">{{ r.thumbText }}</div>
+            </template>
+            <template #title>
+              <span style="font-weight:500">{{ r.title }}</span>
+            </template>
+            <template #label>
+              <span style="color:var(--text-secondary);font-size:var(--fs-sm)">{{ r.subtitle }}</span>
+            </template>
+            <template #value>
+              <span :style="{ color: r.amountColor || 'var(--text-primary)', fontWeight: 600 }">{{ r.amount }}</span>
+            </template>
+          </van-cell>
+        </div>
+      </div>
+
+      <!-- B1 tabbar 底部导航：sticky 黏底 -->
+      <div class="tabbar-wrap">
+        <van-tabbar v-model="tabActive" active-color="#1989fa" inactive-color="#7d7e80">
+          <van-tabbar-item v-for="t in tabbarItems" :key="t.name" :icon="t.icon" :name="t.name">
+            {{ t.label }}
+          </van-tabbar-item>
+        </van-tabbar>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+    const app = createApp({
+      setup() {
+        /* ========== PM 改模板最小动作清单 ==========
+           1. 改 pageTitle
+           2. 填 ROUTES
+           3. 改 kpiItems / quickEntries / recentList / tabbarItems */
+        const pageTitle = ref('仪表盘');
+        const tabActive = ref('home');
+        const location = ref('北京');
+        const notifyCount = ref(3);
+        const loading = ref(true);
+        const errorState = ref(false);
+
+        /* ========== 跳转路由表（PM 改成自己业务的 page id）========== */
+        const ROUTES = {
+          list:    'mobile-list',     // 订单列表
+          form:    'mobile-form',     // 新建订单
+          detail:  'mobile-detail',   // 订单详情
+          home:    'mobile-list',     // tab: 首页
+          me:      'mobile-list',     // tab: 我的
+        };
+
+        /* ========== KPI 卡片（2 个，PM 可增减）========== */
+        const kpiItems = ref([
+          {
+            label: '今日订单', value: '1,286', unit: '单',
+            delta: 12.4, deltaLabel: '较昨日',
+            gradient: 'var(--gradient-primary)',
+          },
+          {
+            label: '今日金额', value: '¥ 58,420', unit: '',
+            delta: 8.6, deltaLabel: '较昨日',
+            gradient: 'var(--gradient-warning)',
+          },
+        ]);
+
+        /* ========== 快捷入口（4 个，PM 可增减）========== */
+        const quickEntries = ref([
+          { name: 'order-new',  label: '新建订单', icon: 'add-o' },
+          { name: 'order-list', label: '订单列表', icon: 'orders-o' },
+          { name: 'goods',      label: '商品管理', icon: 'goods-collect-o' },
+          { name: 'stats',      label: '数据看板', icon: 'chart-trending-o' },
+        ]);
+
+        /* ========== 近期活动（电商订单示例）========== */
+        // 近期订单 mock 与 list / detail 同号订单保持一致（原型演示数据跨页对齐）
+        const recentList = ref([
+          { id: '1', title: 'ORD-20260730001', subtitle: '张三 · 10:24 · 待付款', amount: '¥ 1,059.00', amountColor: 'var(--color-danger)', thumbText: '订', thumbClass: '' },
+          { id: '2', title: 'ORD-20260730002', subtitle: '李四 · 09:10 · 待发货', amount: '¥ 580.00', amountColor: 'var(--color-primary)', thumbText: '订', thumbClass: 'alt' },
+          { id: '3', title: '商品 SKU-001 库存预警', subtitle: '系统 · 12:30 · 库存', amount: '低于阈值', amountColor: 'var(--color-danger)', thumbText: '库', thumbClass: 'danger' },
+          { id: '4', title: 'ORD-20260729005', subtitle: '钱七 · 11:15 · 退款中', amount: '¥ 320.00', amountColor: 'var(--color-danger)', thumbText: '订', thumbClass: 'danger' },
+        ]);
+
+        /* ========== 底部 tabbar（B1 标准模式）========== */
+        const tabbarItems = ref([
+          { name: 'home',    label: '首页',    icon: 'home-o' },
+          { name: 'orders',  label: '订单',    icon: 'orders-o' },
+          { name: 'me',      label: '我的',    icon: 'user-o' },
+        ]);
+
+        /* ========== 反馈封装 ========== */
+        const toast = {
+          ok:  (m) => showToast && showToast({ message: m, type: 'success' }),
+          err: (m) => showToast && showToast({ message: m, type: 'fail' }),
+        };
+
+        /* ========== 加载模拟 ========== */
+        const loadData = () => {
+          loading.value = true;
+          errorState.value = false;
+          setTimeout(() => { loading.value = false; }, 600);
+        };
+        onMounted(loadData);
+
+        /* ========== 交互（统一走 ROUTES）========== */
+        const onNotify = () => { notifyCount.value = 0; toast.ok('暂无新消息'); };
+        const onCustomize = () => toast.ok('打开快捷入口管理');
+        const onViewAll = () => gotoNode(ROUTES.list);
+        const onQuick = (q) => {
+          if (q.name === 'order-new') return gotoNode(ROUTES.form);
+          if (q.name === 'order-list') return gotoNode(ROUTES.list);
+          toast.ok('打开：' + q.label);
+        };
+        const onRecent = (r) => gotoNode(ROUTES.detail, () => toast.ok('查看：' + r.title));
+
+        return {
+          pageTitle, tabActive, tabbarItems,
+          location, notifyCount, loading, errorState,
+          kpiItems, quickEntries, recentList, ROUTES,
+          onNotify, onCustomize, onViewAll, onQuick, onRecent, loadData,
+        };
+      }
+    });
+    app.use(vant);
+    app.mount('#app');
+  </script>
+</body>
+</html>

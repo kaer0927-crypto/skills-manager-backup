@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<!--
+  template: mobile/list.html
+  用途: 移动端列表页模板（电商订单列表 / CRM 客户列表 等通用列表场景）
+
+  1. 典型场景: 电商订单列表（默认示例）/ 客户管理 / 待办审批
+  2. 顶部导航模式: N1 浏览页 —— 左返回 + 中标题 + 右筛选图标
+  3. 底部交互模式: B1 tabbar 底部导航 —— 用于主 tab 页
+  4. 数据模型（items）：
+       { id, title, subtitle, statusText, statusType, amount, time }
+       - statusType: 'primary' | 'success' | 'warning' | 'danger' | 'default'
+       - 状态映射表见 desc/mobile-list.md §状态映射
+  5. 跳转关系（ROUTES）：见 setup() 顶部 ROUTES 注释，集中配置 PM 改 1 处即可
+  6. 4 态约定：loading（van-skeleton 骨架屏）/ empty（van-empty）/ error（重试按钮）/ success（默认）
+  7. 搜索框：白底圆角 + 边框，与页面背景区分
+  8. 筛选抽屉（底部弹出）：覆盖 7 类常见场景：
+       (1) 单选按钮组  (2) 多选按钮组  (3) 下拉单选  (4) 下拉多选
+       (5) 跳转页面单选  (6) 跳转页面多选  (7) 日期范围选择
+  9. 可调样式：--color-* / --radius-* / --space-* CSS 变量（改 scaffold-base.css 一处生效）
+
+  PM 改模板最小动作清单：
+  1. 改 pageTitle（顶部 nav 标题 + 浏览器 tab）
+  2. 填 ROUTES 跳转路由表
+  3. 改 items 业务数据 + filterOptions 各筛选候选项
+  4. 改 tabbarItems（业务 tab）
+  5. 跑 python scripts/sync_nav.py <项目名>
+
+  禁忌：
+  - 不要在 <div id="app"> 内部写 {{XXX}} 占位符（Vue 插值语法）
+  - 不要用 <van-foo ... /> 自闭合（file:// HTML parser bug，列表区会消失）
+  - 不要引外网图片资源（保持 file:// 完全离线）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="device" content="mobile" />
+  <title>{{PAGE_TITLE}}</title>
+  <link rel="stylesheet" href="../assets/scaffold-base.css" />
+  <link rel="stylesheet" href="../assets/vant.css" />
+  <script src="../assets/vue.global.prod.js"></script>
+  <script src="../assets/vant.min.js"></script>
+  <script src="../assets/viewer-bridge.js"></script>
+  <style>
+    html, body { background: var(--bg-page); -webkit-font-smoothing: antialiased; }
+    /* 搜索框：白底圆角 + 边框（与页面背景区分） */
+    .search-wrap {
+      padding: var(--space-2) var(--space-4);
+      background: var(--bg-page);
+    }
+    .search-wrap .van-search {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-1) var(--space-3);
+    }
+    /* 列表行右侧金额 */
+    .cell-amount { color: var(--color-danger); font-weight: 600; font-size: var(--fs-md); }
+    /* 状态点（左侧状态徽标） */
+    .cell-status { display: inline-block; width: 4px; height: 14px; border-radius: 2px; margin-right: var(--space-2); vertical-align: middle; }
+    .cell-status.primary  { background: var(--color-primary); }
+    .cell-status.success  { background: var(--color-success); }
+    .cell-status.warning  { background: var(--color-warning); }
+    .cell-status.danger   { background: var(--color-danger); }
+    .cell-status.default  { background: var(--text-placeholder); }
+    /* 骨架屏 */
+    .skeleton-cell { padding: var(--space-3) var(--space-4); background: var(--bg-card); }
+    .skeleton-cell + .skeleton-cell { border-top: 1px solid var(--border-color); }
+    /* ========== 筛选抽屉（底部弹出）========== */
+    .filter-mask {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .filter-mask.show { opacity: 1; pointer-events: auto; }
+    .filter-drawer {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      max-height: 75vh; background: var(--bg-card);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      z-index: 101; transform: translateY(100%); transition: transform .25s;
+      display: flex; flex-direction: column;
+      box-shadow: 0 -4px 16px rgba(0,0,0,.12);
+    }
+    .filter-drawer.show { transform: translateY(0); }
+    .filter-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+    .filter-head .title { font-size: var(--fs-lg); font-weight: 600; color: var(--text-primary); }
+    .filter-head .close { color: var(--text-secondary); font-size: var(--fs-md); padding: var(--space-1) var(--space-2); cursor: pointer; }
+    .filter-body {
+      flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-3) var(--space-4);
+    }
+    .filter-section { margin-bottom: var(--space-4); }
+    .filter-section .label { font-size: var(--fs-md); font-weight: 500; color: var(--text-primary); margin-bottom: var(--space-2); display: flex; align-items: center; justify-content: space-between; }
+    .filter-section .label .tag { font-size: var(--fs-xs); color: var(--text-secondary); font-weight: 400; }
+    .filter-section .options { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .filter-section .options .chip {
+      padding: var(--space-1) var(--space-3);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: var(--fs-sm); color: var(--text-regular);
+      cursor: pointer; user-select: none;
+    }
+    .filter-section .options .chip.active {
+      background: var(--color-primary); border-color: var(--color-primary); color: #fff;
+    }
+    .filter-section .field-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3); background: var(--bg-page);
+      border-radius: var(--radius-sm);
+    }
+    .filter-section .field-row .field-label { color: var(--text-regular); font-size: var(--fs-md); }
+    .filter-section .field-row .field-value { color: var(--text-secondary); font-size: var(--fs-sm); }
+    .filter-foot {
+      display: flex; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+    .filter-foot .van-button { flex: 1; }
+    /* 已选筛选条件 tag */
+    .active-filters {
+      display: flex; flex-wrap: wrap; gap: var(--space-2);
+      padding: 0 var(--space-4) var(--space-2);
+      background: var(--bg-page);
+    }
+    .active-filters .tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px var(--space-2);
+      background: #e8f3ff; color: var(--color-primary);
+      border-radius: var(--radius-sm); font-size: var(--fs-xs);
+    }
+    .active-filters .tag .x { cursor: pointer; opacity: .6; }
+  </style>
+</head>
+<body>
+  <div id="app" class="is-mobile">
+    <div class="page">
+      <!-- N1 浏览页导航：固定；右上角筛选图标 -->
+      <van-nav-bar :title="pageTitle" left-arrow @click-left="onBack">
+        <template #right>
+          <van-icon name="filter-o" size="20" @click="openFilter"></van-icon>
+        </template>
+      </van-nav-bar>
+
+      <!-- 中间滚动区：搜索框 + 已选筛选 tag + 列表 + 4 态 -->
+      <div class="page-scroll">
+        <!-- 搜索框：白底圆角 + 边框 -->
+        <div class="search-wrap">
+          <van-search
+            v-model="keyword"
+            placeholder="搜索订单号 / 客户名称"
+            shape="round"
+            @search="onSearchSubmit"></van-search>
+        </div>
+
+        <!-- 已选筛选条件 -->
+        <div class="active-filters" v-if="activeFilterTags.length > 0">
+          <span class="tag" v-for="t in activeFilterTags" :key="t.key">
+            {{ t.label }}<span class="x" @click="removeFilter(t.key)">×</span>
+          </span>
+        </div>
+
+        <!-- loading：骨架屏 -->
+        <div v-if="loading">
+          <div class="skeleton-cell" v-for="i in 4" :key="'sk-' + i">
+            <van-skeleton title :row="3" avatar avatar-size="32" avatar-shape="square"></van-skeleton>
+          </div>
+        </div>
+
+        <!-- error：重试按钮 -->
+        <div v-else-if="errorState">
+          <van-empty
+            image="error"
+            description="加载失败，点击重试">
+            <van-button round type="primary" size="small" @click="loadData">重新加载</van-button>
+          </van-empty>
+        </div>
+
+        <!-- empty：空态 -->
+        <div v-else-if="filteredItems.length === 0">
+          <van-empty
+            :description="keyword || activeFilterTags.length > 0 ? '没有匹配的订单' : '暂无订单'">
+            <van-button v-if="!keyword && activeFilterTags.length === 0" round type="primary" size="small" @click="onNew">新建订单</van-button>
+          </van-empty>
+        </div>
+
+        <!-- success：列表 -->
+        <div v-else>
+          <van-cell
+            v-for="item in filteredItems"
+            :key="item.id"
+            is-link
+            @click="onCellClick(item)">
+            <template #title>
+              <span class="cell-status" :class="item.statusType"></span>
+              <span style="font-weight:500">{{ item.title }}</span>
+            </template>
+            <template #label>
+              <div style="color:var(--text-secondary);font-size:var(--fs-sm);margin-top:2px">{{ item.subtitle }}</div>
+            </template>
+            <template #value>
+              <div style="text-align:right">
+                <div class="cell-amount">{{ item.amount }}</div>
+                <van-tag :type="item.statusType" size="medium" plain style="margin-top:2px">{{ item.statusText }}</van-tag>
+              </div>
+            </template>
+          </van-cell>
+
+          <div style="text-align:center;padding:var(--space-4);color:var(--text-secondary);font-size:var(--fs-sm)">
+            — 已加载全部 {{ filteredItems.length }} 条 —
+          </div>
+        </div>
+      </div>
+
+      <!-- B1 tabbar 底部导航：sticky 黏底 -->
+      <div class="tabbar-wrap">
+        <van-tabbar v-model="tabActive" active-color="#1989fa" inactive-color="#7d7e80">
+          <van-tabbar-item v-for="t in tabbarItems" :key="t.name" :icon="t.icon" :name="t.name">
+            {{ t.label }}
+          </van-tabbar-item>
+        </van-tabbar>
+      </div>
+    </div>
+
+    <!-- ========== 筛选抽屉（底部弹出）========== -->
+    <div class="filter-mask" :class="{ show: filterOpen }" @click="closeFilter"></div>
+    <div class="filter-drawer" :class="{ show: filterOpen }">
+      <div class="filter-head">
+        <span class="title">筛选条件</span>
+        <span class="close" @click="closeFilter">关闭</span>
+      </div>
+      <div class="filter-body">
+        <!-- (1) 单选按钮组 -->
+        <div class="filter-section">
+          <div class="label">订单类型 <span class="tag">单选按钮组</span></div>
+          <div class="options">
+            <span class="chip" v-for="o in filterOptions.typeRadio" :key="o.value"
+                  :class="{ active: filters.type === o.value }"
+                  @click="filters.type = o.value">{{ o.label }}</span>
+          </div>
+        </div>
+
+        <!-- (2) 多选按钮组 -->
+        <div class="filter-section">
+          <div class="label">订单状态 <span class="tag">多选按钮组</span></div>
+          <div class="options">
+            <span class="chip" v-for="o in filterOptions.statusMulti" :key="o.value"
+                  :class="{ active: filters.status.includes(o.value) }"
+                  @click="toggleMulti('status', o.value)">{{ o.label }}</span>
+          </div>
+        </div>
+
+        <!-- (3) 下拉单选 -->
+        <div class="filter-section">
+          <div class="label">支付方式 <span class="tag">下拉单选</span></div>
+          <div class="field-row" @click="openDropdown('pay', false)">
+            <span class="field-label">支付方式</span>
+            <span class="field-value">{{ getPayLabel(filters.pay) || '全部' }} ›</span>
+          </div>
+        </div>
+
+        <!-- (4) 下拉多选 -->
+        <div class="filter-section">
+          <div class="label">商品分类 <span class="tag">下拉多选</span></div>
+          <div class="field-row" @click="openDropdown('category', true)">
+            <span class="field-label">商品分类</span>
+            <span class="field-value">{{ filters.category.length > 0 ? filters.category.length + ' 项已选' : '全部' }} ›</span>
+          </div>
+        </div>
+
+        <!-- (5) 跳转页面单选 -->
+        <div class="filter-section">
+          <div class="label">所属客户 <span class="tag">跳转页面单选</span></div>
+          <div class="field-row" @click="openJumpPicker('customer', false)">
+            <span class="field-label">所属客户</span>
+            <span class="field-value">{{ filters.customer || '选择客户' }} ›</span>
+          </div>
+        </div>
+
+        <!-- (6) 跳转页面多选 -->
+        <div class="filter-section">
+          <div class="label">负责门店 <span class="tag">跳转页面多选</span></div>
+          <div class="field-row" @click="openJumpPicker('store', true)">
+            <span class="field-label">负责门店</span>
+            <span class="field-value">{{ filters.store.length > 0 ? filters.store.length + ' 家已选' : '选择门店' }} ›</span>
+          </div>
+        </div>
+
+        <!-- (7) 日期范围选择 -->
+        <div class="filter-section">
+          <div class="label">下单日期 <span class="tag">日期范围选择</span></div>
+          <div class="field-row" @click="openDateRange">
+            <span class="field-label">下单日期</span>
+            <span class="field-value">{{ filters.dateRange.length === 2 ? filters.dateRange.join(' ~ ') : '选择日期范围' }} ›</span>
+          </div>
+        </div>
+      </div>
+      <div class="filter-foot">
+        <van-button plain @click="resetFilter">重置</van-button>
+        <van-button type="primary" @click="applyFilter">确认筛选</van-button>
+      </div>
+    </div>
+
+    <!-- 下拉单选/多选 action-sheet -->
+    <van-action-sheet
+      v-model:show="dropdown.show"
+      :title="dropdown.title"
+      :actions="dropdown.actions"
+      :close-on-click-action="dropdown.multi ? false : true"
+      @select="onDropdownSelect"></van-action-sheet>
+
+    <!-- 跳转页面单选/多选：模拟跳到客户/门店选择页 -->
+    <van-action-sheet
+      v-model:show="jumpPicker.show"
+      :title="jumpPicker.title">
+      <div style="padding:var(--space-4);max-height:50vh;overflow-y:auto">
+        <van-cell
+          v-for="o in jumpPicker.options"
+          :key="o"
+          :title="o"
+          is-link
+          @click="onJumpPick(o)">
+          <template #right-icon>
+            <van-icon v-if="isPicked(o)" name="success" style="color:var(--color-primary)" />
+          </template>
+        </van-cell>
+      </div>
+      <div class="filter-foot">
+        <van-button v-if="jumpPicker.multi" type="primary" @click="jumpPicker.show = false">确认</van-button>
+      </div>
+    </van-action-sheet>
+
+    <!-- 日期范围选择 -->
+    <van-calendar
+      v-model:show="datePicker.show"
+      type="range"
+      color="var(--color-primary)"
+      @confirm="onDateConfirm"></van-calendar>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+    const app = createApp({
+      setup() {
+        /* ========== PM 改模板最小动作清单 ==========
+           1. 改 pageTitle（顶部 nav 标题 + 浏览器 tab）
+           2. 填 ROUTES 跳转路由表
+           3. 改 items 业务数据 + filterOptions 各筛选候选项
+           4. 改 tabbarItems（业务 tab）
+           5. 跑 python scripts/sync_nav.py <项目名> */
+        const pageTitle = ref('{{PAGE_TITLE}}');
+        const keyword = ref('');
+        const tabActive = ref('orders');
+        const loading = ref(true);
+        const errorState = ref(false);
+        const filterOpen = ref(false);
+
+        /* ========== 跳转路由表（PM 改成自己业务的 page id）==========
+           业务约定：同业务的 4 个 page id 命名规则：
+             <resource>-list / -form / -detail / -dashboard
+           示例：order-list / order-form / order-detail / order-dashboard
+        */
+        const ROUTES = {
+          detail:  'mobile-detail',     // 列表 → 详情
+          newForm: 'mobile-form',       // 列表 → 新建表单
+          back:    'mobile-list',       // 默认返回目标
+          home:    'mobile-list',       // tab: 首页
+          orders:  'mobile-list',       // tab: 订单
+          me:      'mobile-list',       // tab: 我的
+        };
+
+        /* ========== 列表数据（电商订单示例，PM 替换为真实接口）========== */
+        const items = ref([
+          { id: 'ORD-20260730001', title: 'ORD-20260730001', subtitle: '张三 · 2026-07-30 10:24', statusText: '待付款', statusType: 'warning', amount: '¥ 1,059.00', time: '2026-07-30 10:24', type: 'sale',    pay: 'wechat', category: 'digital', customer: '张三', store: '北京朝阳店', status: 'warning' },
+          { id: 'ORD-20260730002', title: 'ORD-20260730002', subtitle: '李四 · 2026-07-30 09:10', statusText: '待发货', statusType: 'primary', amount: '¥ 580.00', time: '2026-07-30 09:10', type: 'sale',    pay: 'alipay', category: 'clothing', customer: '李四', store: '上海徐汇店', status: 'primary' },
+          { id: 'ORD-20260730003', title: 'ORD-20260730003', subtitle: '王五 · 2026-07-29 18:00', statusText: '已发货', statusType: 'primary', amount: '¥ 1,280.00', time: '2026-07-29 18:00', type: 'sale',    pay: 'wechat', category: 'home', customer: '王五', store: '北京朝阳店', status: 'primary' },
+          { id: 'ORD-20260729004', title: 'ORD-20260729004', subtitle: '赵六 · 2026-07-29 14:30', statusText: '已完成', statusType: 'success', amount: '¥ 99.00',   time: '2026-07-29 14:30', type: 'sale',    pay: 'wechat', category: 'food', customer: '赵六', store: '广州天河店', status: 'success' },
+          { id: 'ORD-20260729005', title: 'ORD-20260729005', subtitle: '钱七 · 2026-07-29 11:15', statusText: '退款中', statusType: 'danger',  amount: '¥ 320.00',  time: '2026-07-29 11:15', type: 'return',  pay: 'alipay', category: 'digital', customer: '钱七', store: '北京朝阳店', status: 'danger' },
+          { id: 'ORD-20260728006', title: 'ORD-20260728006', subtitle: '孙八 · 2026-07-28 16:42', statusText: '已取消', statusType: 'default', amount: '¥ 760.00',  time: '2026-07-28 16:42', type: 'exchange',pay: 'cod', category: 'clothing', customer: '孙八', store: '深圳南山店', status: 'default' },
+          { id: 'ORD-20260728007', title: 'ORD-20260728007', subtitle: '周九 · 2026-07-28 09:20', statusText: '已完成', statusType: 'success', amount: '¥ 2,460.00', time: '2026-07-28 09:20', type: 'sale',    pay: 'wechat', category: 'home', customer: '周九', store: '上海徐汇店', status: 'success' },
+          { id: 'ORD-20260727008', title: 'ORD-20260727008', subtitle: '吴十 · 2026-07-27 20:08', statusText: '已发货', statusType: 'primary', amount: '¥ 420.00',  time: '2026-07-27 20:08', type: 'sample',  pay: 'alipay', category: 'food', customer: '吴十', store: '广州天河店', status: 'primary' },
+        ]);
+
+        /* ========== 搜索过滤 ==========
+           computed 内避免用 === / !==，避免 HTML attribute 内运算符触发 parse 边缘 case。 */
+        const filteredItems = computed(() => {
+          const kw = keyword.value.trim().toLowerCase();
+          if (!kw && activeFilterTags.value.length === 0) return items.value;
+          return items.value.filter(it => {
+            // 关键字
+            if (kw) {
+              const t = String(it.title).toLowerCase();
+              const s = String(it.subtitle).toLowerCase();
+              if (t.indexOf(kw) < 0 && s.indexOf(kw) < 0) return false;
+            }
+            // 筛选条件
+            if (filters.type && it.type !== filters.type) return false;
+            if (filters.status.length > 0 && !filters.status.includes(it.status)) return false;
+            if (filters.pay && it.pay !== filters.pay) return false;
+            if (filters.category.length > 0 && !filters.category.includes(it.category)) return false;
+            if (filters.customer && it.customer !== filters.customer) return false;
+            if (filters.store.length > 0 && !filters.store.includes(it.store)) return false;
+            if (filters.dateRange.length === 2) {
+              // 按 item.time（YYYY-MM-DD HH:mm）与所选日期范围比较
+              const day = String(it.time).slice(0, 10);
+              if (day < filters.dateRange[0] || day > filters.dateRange[1]) return false;
+            }
+            return true;
+          });
+        });
+
+        /* ========== 底部 tabbar（B1 标准模式）========== */
+        const tabbarItems = ref([
+          { name: 'home',    label: '首页',    icon: 'home-o' },
+          { name: 'orders',  label: '订单',    icon: 'orders-o' },
+          { name: 'me',      label: '我的',    icon: 'user-o' },
+        ]);
+
+        /* ========== 筛选数据 ========== */
+        const filters = reactive({
+          type: '',          // 订单类型：单选
+          status: [],        // 订单状态：多选
+          pay: '',           // 支付方式：下拉单选
+          category: [],      // 商品分类：下拉多选
+          customer: '',      // 所属客户：跳转页面单选
+          store: [],         // 负责门店：跳转页面多选
+          dateRange: [],     // 日期范围：[start, end]
+        });
+
+        const filterOptions = {
+          typeRadio: [
+            { value: 'sale',     label: '销售订单' },
+            { value: 'return',   label: '退货订单' },
+            { value: 'exchange', label: '换货订单' },
+            { value: 'sample',   label: '样品申请' },
+          ],
+          statusMulti: [
+            { value: 'warning', label: '待付款' },
+            { value: 'primary', label: '进行中' },
+            { value: 'success', label: '已完成' },
+            { value: 'danger',  label: '退款中' },
+            { value: 'default', label: '已取消' },
+          ],
+          payOptions: [
+            { name: 'wechat', label: '微信支付' },
+            { name: 'alipay', label: '支付宝' },
+            { name: 'cod',    label: '货到付款' },
+          ],
+          payMap: {
+            wechat: '微信支付',
+            alipay: '支付宝',
+            cod:    '货到付款',
+          },
+          categoryOptions: [
+            { name: 'digital',  label: '数码电器' },
+            { name: 'clothing', label: '服饰鞋包' },
+            { name: 'home',     label: '家居用品' },
+            { name: 'food',     label: '食品保健' },
+            { name: 'beauty',   label: '美妆个护' },
+          ],
+          customerOptions: ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'],
+          storeOptions: ['北京朝阳店', '上海徐汇店', '广州天河店', '深圳南山店', '杭州西湖店'],
+        };
+
+        /* ========== 已选筛选 tag ========== */
+        const activeFilterTags = computed(() => {
+          const tags = [];
+          if (filters.type) {
+            const o = filterOptions.typeRadio.find(x => x.value === filters.type);
+            if (o) tags.push({ key: 'type', label: '类型：' + o.label });
+          }
+          if (filters.status.length > 0) {
+            tags.push({ key: 'status', label: '状态：' + filters.status.length + ' 项' });
+          }
+          if (filters.pay) {
+            tags.push({ key: 'pay', label: '支付：' + filterOptions.payMap[filters.pay] });
+          }
+          if (filters.category.length > 0) {
+            tags.push({ key: 'category', label: '分类：' + filters.category.length + ' 项' });
+          }
+          if (filters.customer) {
+            tags.push({ key: 'customer', label: '客户：' + filters.customer });
+          }
+          if (filters.store.length > 0) {
+            tags.push({ key: 'store', label: '门店：' + filters.store.length + ' 家' });
+          }
+          if (filters.dateRange.length === 2) {
+            tags.push({ key: 'dateRange', label: '日期：' + filters.dateRange.join(' ~ ') });
+          }
+          return tags;
+        });
+
+        const removeFilter = (key) => {
+          if (key === 'status' || key === 'category' || key === 'store') filters[key] = [];
+          else if (key === 'dateRange') filters.dateRange = [];
+          else filters[key] = '';
+        };
+
+        /* ========== 多选按钮组切换 ========== */
+        const toggleMulti = (key, value) => {
+          const arr = filters[key];
+          const idx = arr.indexOf(value);
+          if (idx >= 0) arr.splice(idx, 1);
+          else arr.push(value);
+        };
+
+        /* ========== 下拉单选/多选 action-sheet ========== */
+        const dropdown = reactive({ show: false, title: '', multi: false, field: '', actions: [] });
+        const getPayLabel = (v) => filterOptions.payMap[v] || '';
+        const openDropdown = (field, multi) => {
+          dropdown.field = field;
+          dropdown.multi = multi;
+          if (field === 'pay') {
+            dropdown.title = '选择支付方式';
+            dropdown.actions = filterOptions.payOptions;
+          } else if (field === 'category') {
+            dropdown.title = '选择商品分类（多选）';
+            dropdown.actions = filterOptions.categoryOptions;
+          }
+          dropdown.show = true;
+        };
+        const onDropdownSelect = (a) => {
+          if (dropdown.multi) {
+            toggleMulti(dropdown.field, a.name);
+          } else {
+            filters[dropdown.field] = a.name;
+            dropdown.show = false;
+          }
+        };
+
+        /* ========== 跳转页面单选/多选 ========== */
+        const jumpPicker = reactive({ show: false, title: '', multi: false, field: '', options: [], temp: [] });
+        const openJumpPicker = (field, multi) => {
+          jumpPicker.field = field;
+          jumpPicker.multi = multi;
+          if (field === 'customer') {
+            jumpPicker.title = '选择客户';
+            jumpPicker.options = filterOptions.customerOptions;
+            jumpPicker.temp = filters.customer ? [filters.customer] : [];
+          } else if (field === 'store') {
+            jumpPicker.title = '选择门店（多选）';
+            jumpPicker.options = filterOptions.storeOptions;
+            jumpPicker.temp = [...filters.store];
+          }
+          jumpPicker.show = true;
+        };
+        const isPicked = (o) => {
+          if (jumpPicker.multi) return jumpPicker.temp.includes(o);
+          return jumpPicker.temp[0] === o;
+        };
+        const onJumpPick = (o) => {
+          if (jumpPicker.multi) {
+            const idx = jumpPicker.temp.indexOf(o);
+            if (idx >= 0) jumpPicker.temp.splice(idx, 1);
+            else jumpPicker.temp.push(o);
+          } else {
+            filters[jumpPicker.field] = o;
+            jumpPicker.show = false;
+          }
+        };
+        // 监听 jumpPicker 关闭时提交多选
+        // 用 watch 替代：PM 接入更复杂路由时可替换
+        // 去掉 temp.length > 0 条件：用户全取消再确认也要能清空已选（否则选了无法取消）
+        Vue.watch(() => jumpPicker.show, (v) => {
+          if (!v && jumpPicker.multi) {
+            filters[jumpPicker.field] = [...jumpPicker.temp];
+          }
+        });
+
+        /* ========== 日期范围选择 ========== */
+        const datePicker = reactive({ show: false });
+        const openDateRange = () => { datePicker.show = true; };
+        const onDateConfirm = (dates) => {
+          const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          filters.dateRange = [fmt(dates[0]), fmt(dates[1])];
+          datePicker.show = false;
+        };
+
+        /* ========== 抽屉操作 ========== */
+        const openFilter = () => { filterOpen.value = true; };
+        const closeFilter = () => { filterOpen.value = false; };
+        const resetFilter = () => {
+          filters.type = '';
+          filters.status = [];
+          filters.pay = '';
+          filters.category = [];
+          filters.customer = '';
+          filters.store = [];
+          filters.dateRange = [];
+        };
+        const applyFilter = () => {
+          filterOpen.value = false;
+          toast.ok('已应用筛选');
+        };
+
+        /* ========== 加载模拟（PM 替换为真实接口）========== */
+        const loadData = () => {
+          loading.value = true;
+          errorState.value = false;
+          setTimeout(() => {
+            // 模拟：PM 改为 fetch(...).then(...).catch(() => errorState.value = true)
+            loading.value = false;
+          }, 800);
+        };
+        onMounted(loadData);
+
+        /* ========== 反馈封装 ========== */
+        const toast = {
+          ok:  (m) => showToast && showToast({ message: m, type: 'success' }),
+          err: (m) => showToast && showToast({ message: m, type: 'fail' }),
+        };
+
+        /* ========== 交互（统一走 ROUTES）========== */
+        const goBack  = () => gotoNode(ROUTES.back, () => history.back());
+        const goDetail = (item) => gotoNode(ROUTES.detail, () => toast.ok('查看 ' + item.title));
+        const goNew   = () => gotoNode(ROUTES.newForm);
+
+        const onBack = goBack;
+        const onCellClick = goDetail;
+        const onNew = goNew;
+        const onSearchSubmit = () => { /* 提交搜索（实时过滤已通过 computed 生效） */ };
+
+        return {
+          pageTitle, keyword, filteredItems, tabActive, tabbarItems,
+          loading, errorState, ROUTES,
+          filterOpen, filters, filterOptions, activeFilterTags,
+          dropdown, jumpPicker, datePicker,
+          getPayLabel, openFilter, closeFilter, resetFilter, applyFilter,
+          toggleMulti, openDropdown, onDropdownSelect,
+          openJumpPicker, isPicked, onJumpPick,
+          openDateRange, onDateConfirm, removeFilter,
+          onBack, onCellClick, onNew, onSearchSubmit, loadData,
+        };
+      }
+    });
+    app.use(vant);
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "55f189ad-77c2-4c75-8bc3-bf1bf867b30e",
+  "path": "competitive-analysis",
+  "path_key": "competitive-analysis",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
