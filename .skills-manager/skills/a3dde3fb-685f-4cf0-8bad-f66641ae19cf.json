@@ -4,7 +4,9 @@
   "path": "hv-analysis",
   "path_key": "hv-analysis",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "分析方法类"
+  ],
   "source": {
     "type": "local",
     "ref": null,

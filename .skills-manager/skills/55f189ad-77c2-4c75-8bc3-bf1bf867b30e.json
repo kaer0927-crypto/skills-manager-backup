@@ -4,7 +4,10 @@
   "path": "competitive-analysis",
   "path_key": "competitive-analysis",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "分析方法类",
+    "竞品分析"
+  ],
   "source": {
     "type": "local",
     "ref": null,

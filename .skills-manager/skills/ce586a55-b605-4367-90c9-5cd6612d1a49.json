@@ -4,7 +4,9 @@
   "path": "neat-freak",
   "path_key": "neat-freak",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "项目收尾、记忆更新"
+  ],
   "source": {
     "type": "local",
     "ref": null,
