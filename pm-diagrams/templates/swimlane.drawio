@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-29T00:00:00.000Z" agent="pm-diagrams-skill" version="24.0.0">
+  <diagram name="退款审核-4泳道" id="swimlane-4way">
+    <mxGraphModel dx="1240" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 外层大泳道：流程名（4 个子泳道无缝嵌在这一个大泳道里） -->
+        <mxCell id="lane_outer" value="退款审核流程" style="swimlane;html=1;childLayout=stackLayout;resizeParent=1;resizeParentMax=0;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1140" height="800" as="geometry" />
+        </mxCell>
+
+        <!-- 内层 4 个子泳道：紧密相接无缝衔接，底部与外层泳道对齐（数量按需扩展到 N） -->
+        <mxCell id="lane_user" value="用户" style="swimlane;html=1;startSize=30;" vertex="1" parent="lane_outer">
+          <mxGeometry x="0" y="40" width="285" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_merchant" value="商家" style="swimlane;html=1;startSize=30;" vertex="1" parent="lane_outer">
+          <mxGeometry x="285" y="40" width="285" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_backend" value="平台后端" style="swimlane;html=1;startSize=30;" vertex="1" parent="lane_outer">
+          <mxGeometry x="570" y="40" width="285" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_payment" value="支付网关" style="swimlane;html=1;startSize=30;" vertex="1" parent="lane_outer">
+          <mxGeometry x="855" y="40" width="285" height="760" as="geometry" />
+        </mxCell>
+
+        <!-- 用户泳道：起止用椭圆（arcSize=50）；节点默认 120x60，子泳道宽 285 居中 x=82；跨泳道节点 y 对齐 -->
+        <mxCell id="step_user_1" value="1. 申请退款" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_user">
+          <mxGeometry x="82" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_user_2" value="收到结果" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" vertex="1" parent="lane_user">
+          <mxGeometry x="82" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 商家泳道：判断用菱形（rhombus）；节点默认 120x60 -->
+        <mxCell id="step_merch_1" value="2. 审核" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="lane_merchant">
+          <mxGeometry x="82" y="60" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_merch_2" value="3. 同意退款" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_merchant">
+          <mxGeometry x="82" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_merch_3" value="4. 拒绝退款" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_merchant">
+          <mxGeometry x="82" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 平台后端泳道 -->
+        <mxCell id="step_back_1" value="5. 退款处理" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_backend">
+          <mxGeometry x="82" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_back_2" value="6. 更新订单" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_backend">
+          <mxGeometry x="82" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 支付网关泳道 -->
+        <mxCell id="step_pay_1" value="7. 执行退款" style="rounded=1;whiteSpace=wrap;html=1;arcSize=0;" vertex="1" parent="lane_payment">
+          <mxGeometry x="82" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 同泳道内边：parent 指向所在子泳道；正交+圆角风格 -->
+        <mxCell id="e_merch1_merch2" value="同意" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_merchant" source="step_merch_1" target="step_merch_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_merch1_merch3" value="拒绝" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_merchant" source="step_merch_1" target="step_merch_3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 跨子泳道边：parent 指向外层大泳道 lane_outer；正交+圆角风格 -->
+        <mxCell id="e_user1_merch1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_user_1" target="step_merch_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_merch2_back1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_merch_2" target="step_back_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_merch3_user2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_merch_3" target="step_user_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_back1_pay1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_back_1" target="step_pay_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pay1_back2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_pay_1" target="step_back_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_back2_user2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;" edge="1" parent="lane_outer" source="step_back_2" target="step_user_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

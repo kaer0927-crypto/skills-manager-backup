@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "2d7408e2-af96-4947-9cb1-00e83f889fef",
+  "path": "pm-diagrams",
+  "path_key": "pm-diagrams",
+  "enabled": true,
+  "tags": [
+    "画图 skills"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
