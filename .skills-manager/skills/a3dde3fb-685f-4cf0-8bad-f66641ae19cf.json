@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "a3dde3fb-685f-4cf0-8bad-f66641ae19cf",
+  "path": "hv-analysis",
+  "path_key": "hv-analysis",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
