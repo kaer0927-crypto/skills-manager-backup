@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "efdef3aa-f64e-40d8-9726-5c4a82dc7896",
+  "path": "fe-scaffold",
+  "path_key": "fe-scaffold",
+  "enabled": true,
+  "tags": [
+    "前端 Demo 搭建流水线"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
