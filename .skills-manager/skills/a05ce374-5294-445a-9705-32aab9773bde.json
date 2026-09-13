@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "a05ce374-5294-445a-9705-32aab9773bde",
+  "path": "skill-creator",
+  "path_key": "skill-creator",
+  "enabled": true,
+  "tags": [
+    "skills 创建"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "aaaaqwq/agi-super-team/skill-creator",
+    "subpath": "skills/skill-creator",
+    "branch": null
+  }
+}

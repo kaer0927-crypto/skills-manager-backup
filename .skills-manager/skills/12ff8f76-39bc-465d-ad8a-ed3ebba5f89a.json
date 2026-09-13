@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "12ff8f76-39bc-465d-ad8a-ed3ebba5f89a",
+  "path": "requirements-pipeline",
+  "path_key": "requirements-pipeline",
+  "enabled": true,
+  "tags": [
+    "需求分析全流程"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
