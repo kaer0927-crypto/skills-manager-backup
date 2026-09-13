@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skill_id": "4d300c41-aed1-483c-8126-a9424f5a77d2",
+  "path": "demo-design",
+  "path_key": "demo-design",
+  "enabled": true,
+  "tags": [
+    "创建与迭代产品原型 Demo",
+    "原型 demo"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

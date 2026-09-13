@@ -1,0 +1,23 @@
+:root {
+  /* Layout */
+  --layout-aside-width: 220px;
+  --layout-aside-collapsed-width: 64px;
+  --layout-aside-logo-height: 56px;
+  --layout-tabs-height: 40px;
+  --layout-main-bg: #f5f7fa;
+  --layout-main-padding: 16px;
+
+  /* Aside internal */
+  --aside-personal-center-height: 64px;
+
+  /* Colors */
+  --color-primary: #409eff;
+  --color-danger: #f56c6c;
+  --color-border: #e4e7ed;
+  --color-text-primary: #303133;
+  --color-text-regular: #606266;
+  --color-text-secondary: #909399;
+
+  /* Tab */
+  --tab-active-line-height: 2px;
+}

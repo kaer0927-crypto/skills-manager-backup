@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "a6793f8c-d33c-427d-9175-6cfc2cef59da",
+  "path": "meeting-minutes",
+  "path_key": "meeting-minutes",
+  "enabled": true,
+  "tags": [
+    "会议纪要"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

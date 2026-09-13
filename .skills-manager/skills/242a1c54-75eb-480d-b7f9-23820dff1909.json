@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "242a1c54-75eb-480d-b7f9-23820dff1909",
+  "path": "requirements-analysis",
+  "path_key": "requirements-analysis",
+  "enabled": true,
+  "tags": [
+    "需求分析、需求调研"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

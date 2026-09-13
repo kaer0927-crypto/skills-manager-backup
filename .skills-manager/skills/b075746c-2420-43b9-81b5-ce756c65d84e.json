@@ -4,9 +4,11 @@
   "path": "prototype-design",
   "path_key": "prototype-design",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "初始化PRD 原型项目"
+  ],
   "source": {
-    "type": "import",
+    "type": "local",
     "ref": null,
     "subpath": null,
     "branch": null
