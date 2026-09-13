@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "a323706f-2a62-4dcc-8912-269483112c83",
+  "path": "storage-analyzer",
+  "path_key": "storage-analyzer",
+  "enabled": true,
+  "tags": [
+    "macOS 只读存储分析"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/KKKKhazix/khazix-skills",
+    "subpath": "storage-analyzer",
+    "branch": null
+  }
+}

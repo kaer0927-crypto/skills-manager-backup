@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "8a43281d-da1b-49d7-bf8e-42411f5ba8c1",
+  "path": "leader",
+  "path_key": "leader",
+  "enabled": true,
+  "tags": [
+    "领导想法拆成目标任务书"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/KKKKhazix/khazix-skills",
+    "subpath": "leader",
+    "branch": null
+  }
+}

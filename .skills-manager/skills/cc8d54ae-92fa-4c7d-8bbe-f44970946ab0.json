@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "cc8d54ae-92fa-4c7d-8bbe-f44970946ab0",
+  "path": "hv-analysis",
+  "path_key": "hv-analysis",
+  "enabled": true,
+  "tags": [
+    "横纵分析法"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/KKKKhazix/khazix-skills",
+    "subpath": "hv-analysis",
+    "branch": null
+  }
+}

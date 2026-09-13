@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "3b635b93-6d0d-463e-abb3-d6e3705c19a6",
+  "path": "khazix-writer",
+  "path_key": "khazix-writer",
+  "enabled": true,
+  "tags": [
+    "卡兹克公众号长文写作"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/KKKKhazix/khazix-skills",
+    "subpath": "khazix-writer",
+    "branch": null
+  }
+}
