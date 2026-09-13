@@ -5,6 +5,7 @@
   "path_key": "prd-writer-01",
   "enabled": true,
   "tags": [
+    "prd",
     "prd 文档写作01"
   ],
   "source": {
