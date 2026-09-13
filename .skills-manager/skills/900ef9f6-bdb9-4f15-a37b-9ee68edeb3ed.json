@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "900ef9f6-bdb9-4f15-a37b-9ee68edeb3ed",
+  "path": "human-writing",
+  "path_key": "human-writing",
+  "enabled": true,
+  "tags": [
+    "去AI 味"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/KKKKhazix/human-writing",
+    "subpath": "human-writing",
+    "branch": null
+  }
+}

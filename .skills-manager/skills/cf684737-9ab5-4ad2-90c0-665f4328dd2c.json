@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "cf684737-9ab5-4ad2-90c0-665f4328dd2c",
+  "path": "gongwen",
+  "path_key": "gongwen",
+  "enabled": true,
+  "tags": [
+    "公文格式"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mizzlelover/gongwen-gbt9704-skill",
+    "subpath": null,
+    "branch": null
+  }
+}
