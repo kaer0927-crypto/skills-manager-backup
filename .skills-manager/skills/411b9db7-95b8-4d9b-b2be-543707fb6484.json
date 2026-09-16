@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "411b9db7-95b8-4d9b-b2be-543707fb6484",
+  "path": "style-extractor",
+  "path_key": "style-extractor",
+  "enabled": true,
+  "tags": [
+    "网页风格视觉提取"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/vibepm666/style-extractor",
+    "subpath": null,
+    "branch": null
+  }
+}
