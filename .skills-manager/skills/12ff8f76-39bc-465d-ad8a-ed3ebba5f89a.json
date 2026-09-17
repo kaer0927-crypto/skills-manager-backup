@@ -5,7 +5,9 @@
   "path_key": "requirements-pipeline",
   "enabled": true,
   "tags": [
-    "需求分析全流程"
+    "售前调研",
+    "需求分析全流程",
+    "需求采集"
   ],
   "source": {
     "type": "local",
