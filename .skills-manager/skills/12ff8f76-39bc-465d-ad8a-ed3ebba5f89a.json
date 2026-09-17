@@ -5,7 +5,12 @@
   "path_key": "requirements-pipeline",
   "enabled": true,
   "tags": [
+    "→功能拆解",
+    "可行性评估",
     "售前调研",
+    "清单迭代",
+    "竞品对标",
+    "质控审查",
     "需求分析全流程",
     "需求采集"
   ],
