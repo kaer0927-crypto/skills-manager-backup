@@ -4,7 +4,9 @@
   "path": "typesafe-ai",
   "path_key": "typesafe-ai",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "jev"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/typesafe-ai/skills",
