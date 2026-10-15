@@ -16,6 +16,7 @@
     "hermes": true,
     "opencode": true,
     "pi": true,
+    "pi_desktop": true,
     "workbuddy": true,
     "zcode": true
   }
