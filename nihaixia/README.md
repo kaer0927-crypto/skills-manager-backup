@@ -8,6 +8,11 @@
 
 `129条伤寒论` · `23篇金匮` · `72篇黄帝内经` · `神农本草经374种本草（上137/中110/下127）` · `1257 例结构化医案 + 243 例叙事医案` · `2,452页讲义` · `3.5M字精萃`
 
+<a href="https://trendshift.io/repositories/108262?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-108262" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/108262/daily?language=HTML" alt="jangviktor-web%2Fnihaixia | Trendshift" width="250" height="55"/></a>
+<a href="https://trendshift.io/repositories/108262?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-108262" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/108262/weekly?language=HTML" alt="jangviktor-web%2Fnihaixia | Trendshift" width="250" height="55"/></a>
+<a href="https://trendshift.io/repositories/108262?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-108262" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/108262/monthly?language=HTML" alt="jangviktor-web%2Fnihaixia | Trendshift" width="250" height="55"/></a>
+
+
 [![GitHub Stars](https://img.shields.io/github/stars/jangviktor-web/nihaixia?style=for-the-badge&color=yellow&label=Stars)](https://github.com/jangviktor-web/nihaixia/stargazers)
 [![ClawHub](https://img.shields.io/badge/腾讯云skillhub-安装倪海厦SKILL-green?style=for-the-badge)](https://skillhub.cn/skills/user_ff4d9420/nihaixia-pro)
 [![版本](https://img.shields.io/badge/版本-v2.3.1-blue?style=for-the-badge)](https://github.com/jangviktor-web/nihaixia/releases)
