@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "627fc612-c33a-4b2e-9642-0ad66092ed50",
+  "path": "anatomy",
+  "path_key": "anatomy",
+  "enabled": true,
+  "tags": [
+    "视频制作"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/wheresryan22/anatomy",
+    "subpath": null,
+    "branch": null
+  }
+}
