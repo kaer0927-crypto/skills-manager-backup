@@ -12,10 +12,11 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 1. **确认适用**：任务是生产/改造前端界面（后台、管理端、SaaS 页、移动端壳等）→ 继续。纯文案/逻辑任务不适用。
 2. **定主题**：读 `references/ui-style-guide.md` 选主题（默认推荐 SemiDesign 或亮色科技蓝；拿不准问用户，给出 2–3 个候选差异）。
 3. **读主题细节**：读 `references/themes/<主题名>-style.md` 全文，拿到该主题完整 Token（颜色/字体/圆角/阴影/按钮/表单/弹窗/滚动条/提示词包/避免项）。
-4. **选组件**：读 `references/component-catalog.md`，按要做的页面类型选骨架（看板/列表/表单/详情/结果/异常/登录/移动端壳），并选组件演示页做控件参考。
-5. **生产**：按主题 Token 实现界面，复用组件骨架结构，填充真实业务内容。
-6. **自查**：对照主题文档的「避免项」与「必须保持不变」逐条检查。
-7. **（可选）参考真实实现**：需要抄具体控件写法时，按 `references/source-layout.md` 从源项目读真实 HTML/CSS/JS。**若记录路径失效（被移动/清理/变化）：禁止猜测新路径或静默兜底，必须先向用户发起确认，拿到用户确认的新位置后再引用。**
+4. **选组件与页面骨架**：读 `references/component-catalog.md` 按页面类型选骨架；再读 `references/pages-guide.md` 确认该类型页面的结构规范、`references/components-guide.md` 选控件并确认控件规范。
+5. **表单场景读表单规范**：涉及表单（新建/编辑/表单页/分步）时，读 `references/forms-guide.md` 按表单控件与布局规范实现。
+6. **生产**：按主题 Token 实现界面，复用组件骨架结构，填充真实业务内容。
+7. **自查**：对照主题文档的「避免项」与「必须保持不变」，以及各规范文档的「自查清单」逐条检查。
+8. **（可选）参考真实实现**：需要抄具体控件写法时，按 `references/source-layout.md` 从源项目读真实 HTML/CSS/JS。**若记录路径失效（被移动/清理/变化）：禁止猜测新路径或静默兜底，必须先向用户发起确认，拿到用户确认的新位置后再引用。**
 
 ## 生产硬规则
 
@@ -29,6 +30,8 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 - **路径失效必须向用户确认**：记录在 `references/source-layout.md` 的源模板路径不可用/被移动/变化时，禁止猜测新路径、禁止静默退回内置 references 继续生产；必须先向用户发起确认，经用户确认新位置后才可引用。
 - **筛选区单行栅格**：列表页筛选区按「一行 6 个字段、第 7 个起自动换行」栅格排布（详见 ui-style-guide.md「筛选区布局」）；字段不足 6 个时全部同行排完，查询/重置按钮跟随字段流不单独占行；禁止人为拉宽字段把条件与按钮拆成两行。
 - **列表 CRUD 规范**：数据列表的新增/编辑用弹窗表单（回填 + 校验 + loading + Toast + 重查），删除/批量删除用 danger 确认弹窗，未勾选时批量按钮禁用，删空回退页码，分页条完整（详见 references/crud-guide.md）。
+- **表单规范**：表单字段按栅格排布（常规 2–3 列，窄屏单列），标签左对齐 14/600、必填红 *，校验错误红环短句不关表单，提交行按钮完整（详见 references/forms-guide.md）。
+- **组件与页面规范**：控件用法、表格/列表/图表/指标卡/富文本/扩展组件遵守 references/components-guide.md；页面骨架与结构遵守 references/pages-guide.md（按布局类型 shell/center/split/phone 选型）。
 
 ## 常用命令式提示词（给其他 agent 用）
 
@@ -39,6 +42,9 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 ## 文件导航
 
 - `references/ui-style-guide.md` — 12 套主题速查与选择指引、通用规范（按钮/表单/弹窗/滚动条/布局/筛选区）
+- `references/forms-guide.md` — 表单规范（控件全清单/栅格布局/4 种表单页结构/校验反馈）
+- `references/components-guide.md` — 组件规范总览（基础组件/表格/列表/图表/指标卡/富文本/扩展组件）
+- `references/pages-guide.md` — 页面模板规范（登录/看板/列表/表单/详情/结果/异常/个人中心/移动端壳）
 - `references/crud-guide.md` — 数据列表增删改查规范（操作列/弹窗表单/确认删除/批量/分页/自查清单）
 - `references/component-catalog.md` — 组件索引（admin 50 页 + app 8 壳）、选型速查表
 - `references/themes/<主题名>-style.md` — 各主题完整规范（Token/提示词包/防跑偏/评分）
