@@ -11,7 +11,7 @@
     "codebuddy": true,
     "codex": true,
     "cursor": true,
-    "deepseek_harness": true,
+    "deepseek_harness": false,
     "gemini_cli": true,
     "github_copilot": true,
     "hermes": true,
