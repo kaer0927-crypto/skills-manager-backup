@@ -4,7 +4,9 @@
   "path": "vibepm-frame-ui",
   "path_key": "vibepm-frame-ui",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "UI 设计规范"
+  ],
   "source": {
     "type": "local",
     "ref": null,
