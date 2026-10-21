@@ -15,7 +15,7 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 4. **选组件**：读 `references/component-catalog.md`，按要做的页面类型选骨架（看板/列表/表单/详情/结果/异常/登录/移动端壳），并选组件演示页做控件参考。
 5. **生产**：按主题 Token 实现界面，复用组件骨架结构，填充真实业务内容。
 6. **自查**：对照主题文档的「避免项」与「必须保持不变」逐条检查。
-7. **（可选）参考真实实现**：需要抄具体控件写法时，按 `references/source-layout.md` 从源项目读真实 HTML/CSS/JS。
+7. **（可选）参考真实实现**：需要抄具体控件写法时，按 `references/source-layout.md` 从源项目读真实 HTML/CSS/JS。**若记录路径失效（被移动/清理/变化）：禁止猜测新路径或静默兜底，必须先向用户发起确认，拿到用户确认的新位置后再引用。**
 
 ## 生产硬规则
 
@@ -26,6 +26,9 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 - **弹窗不透明**：面板不透明 + 柔影 + 主题圆角档；遮罩可 blur，面板禁止玻璃半透明。
 - **滚动条统一**：宽 8px、胶囊滑块、透明轨道（WebKit + Firefox 双写），见主题文档。
 - **排版**：正文 14–16px，标签 14px/600，标题字重 600–800；中文回退 PingFang SC / 微软雅黑。
+- **路径失效必须向用户确认**：记录在 `references/source-layout.md` 的源模板路径不可用/被移动/变化时，禁止猜测新路径、禁止静默退回内置 references 继续生产；必须先向用户发起确认，经用户确认新位置后才可引用。
+- **筛选区单行栅格**：列表页筛选区按「一行 6 个字段、第 7 个起自动换行」栅格排布（详见 ui-style-guide.md「筛选区布局」）；字段不足 6 个时全部同行排完，查询/重置按钮跟随字段流不单独占行；禁止人为拉宽字段把条件与按钮拆成两行。
+- **列表 CRUD 规范**：数据列表的新增/编辑用弹窗表单（回填 + 校验 + loading + Toast + 重查），删除/批量删除用 danger 确认弹窗，未勾选时批量按钮禁用，删空回退页码，分页条完整（详见 references/crud-guide.md）。
 
 ## 常用命令式提示词（给其他 agent 用）
 
@@ -35,7 +38,8 @@ description: 基于 VibePM / Frame「中后台原型及前端交付解决方案�
 
 ## 文件导航
 
-- `references/ui-style-guide.md` — 12 套主题速查与选择指引、通用规范（按钮/表单/弹窗/滚动条/布局）
+- `references/ui-style-guide.md` — 12 套主题速查与选择指引、通用规范（按钮/表单/弹窗/滚动条/布局/筛选区）
+- `references/crud-guide.md` — 数据列表增删改查规范（操作列/弹窗表单/确认删除/批量/分页/自查清单）
 - `references/component-catalog.md` — 组件索引（admin 50 页 + app 8 壳）、选型速查表
 - `references/themes/<主题名>-style.md` — 各主题完整规范（Token/提示词包/防跑偏/评分）
 - `references/source-layout.md` — 源项目路径、目录结构、读真实实现的方法

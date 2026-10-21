@@ -1,12 +1,10 @@
 {
   "schema_version": 1,
-  "skill_id": "4092c6f9-21eb-41c0-bb57-4db203fc372d",
+  "skill_id": "062753e6-397a-4201-9f16-8d7b750f1e13",
   "path": "vibepm-frame-ui",
   "path_key": "vibepm-frame-ui",
   "enabled": true,
-  "tags": [
-    "UI 设计规范"
-  ],
+  "tags": [],
   "source": {
     "type": "local",
     "ref": null,

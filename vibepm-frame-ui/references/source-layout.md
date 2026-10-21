@@ -2,8 +2,10 @@
 
 ## 源项目位置
 
+**用户确认位置（2026-10-21 确认，Mac 本地）**：
+
 ```
-/home/user/Doubao/chats/38440939649486850/vibepm_site/
+/Users/shuziniuma/Desktop/学习资料/Coding资料/html模板/中后台原型及前端交付解决方案
 ```
 
 - VibePM / Frame 全量离线镜像（抓取自 https://www.vibepm.top/frame/，2026-09-10）
@@ -11,8 +13,20 @@
 - 全部资源本地化，file:// 双击可离线打开
 - 演示账号：admin / 123456（或 URL 加 `?galleryPreview=1` 跳过登录）
 
-> 注意：`/home/user/.doubao/agent_mode/workspace/vibepm_site/` 是残缺版本（仅 dashboard.html），勿用作源。
-> 源项目路径如不可用，可退回本 Skill 内置的 `references/component-catalog.md` 与 `references/themes/` 独立工作。
+> **【沙箱访问说明】**
+> Agent 运行在云端 Linux 沙箱，**无法直接读取上述 Mac 本地路径**（沙箱内不存在 `/Users`）。
+> 引用真实实现前，必须先确认该目录内容已同步到沙箱内可访问的位置（用户上传/打包传输），并在本文档记录同步后的沙箱路径。
+> 沙箱内历史镜像：`/home/user/Doubao/chats/38440939649486850/vibepm_site/`（抓取于 2026-09-10，可能随会话清理失效；若不可用需向用户确认后重新同步）。
+> 工作区 `/home/user/.doubao/agent_mode/workspace/vibepm_site/` 是残缺版本（仅 dashboard.html），勿用作源。
+>
+> **【路径失效处理 · 强制规则】**
+> 若本 Skill 记录的源项目路径不可用、被移动、被清理或发生变化，**禁止**自行猜测新路径、禁止静默退回内置 references 继续生产。
+> 必须**先向用户发起确认**：说明当前记录路径已失效（给出记录的路径与失效现象），请用户提供新的模板位置，在用户明确确认新路径后再引用。
+> 用户未确认前，不得开始或继续前端界面生产。
+
+## 引用确认时机
+
+使用本 Skill 前应先校验源项目路径是否存在（`ls` 或 `Read` 记录路径）；不存在即视为「路径已变」，走上面的强制规则。
 
 ## 目录结构
 
