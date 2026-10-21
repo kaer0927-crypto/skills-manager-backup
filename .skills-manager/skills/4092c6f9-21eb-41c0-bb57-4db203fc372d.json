@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4092c6f9-21eb-41c0-bb57-4db203fc372d",
+  "path": "vibepm-frame-ui",
+  "path_key": "vibepm-frame-ui",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}
