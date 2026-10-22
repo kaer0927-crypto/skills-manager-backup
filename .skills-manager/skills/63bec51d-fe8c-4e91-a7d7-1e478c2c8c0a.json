@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "63bec51d-fe8c-4e91-a7d7-1e478c2c8c0a",
+  "path": "daoru",
+  "path_key": "daoru",
+  "enabled": true,
+  "tags": [
+    "导入模板"
+  ],
+  "source": {
+    "type": "local",
+    "ref": null,
+    "subpath": null,
+    "branch": null
+  }
+}

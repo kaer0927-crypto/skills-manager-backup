@@ -15,10 +15,12 @@
     "gemini_cli": true,
     "github_copilot": true,
     "hermes": true,
+    "minimax_code": true,
     "opencode": true,
     "pi": true,
     "pi_desktop": true,
     "workbuddy": true,
+    "workbuddy_overseas": true,
     "zcode": true
   }
 }
