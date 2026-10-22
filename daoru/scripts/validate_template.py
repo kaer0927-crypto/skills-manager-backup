@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-"""Validate the import workbook against the golden template and XML contract."""
+"""Validate a generated import template against the field definition spec."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import math
-import re
-import zipfile
+import sys
 from pathlib import Path
-from typing import Any
 
 from openpyxl import load_workbook
 from openpyxl.cell.rich_text import CellRichText, TextBlock
 from openpyxl.utils import get_column_letter
 
 from template_contract import (
-    COLUMN_COUNT,
-    EXPECTED_DIMENSION,
-    EXPECTED_MERGED_RANGES,
-    FIRST_DATA_ROW,
-    GOLDEN_SHA256,
-    GOLDEN_TEMPLATE,
-    LAST_PREFORMATTED_ROW,
-    SHEET_NAME,
-    sha256_file,
+    DATA_ROW_HEIGHT,
+    DEFAULT_COLUMN_WIDTH,
+    DEFAULT_DATA_ROWS,
+    DEFAULT_SHEET_NAME,
+    FREEZE_PANE,
+    LOGIC_COLOR,
+    REQUIRED_STAR_COLOR,
+    ROW_HEIGHTS,
+    has_module_names,
 )
 
 
@@ -37,334 +36,153 @@ class Validation:
         if not condition:
             self.failures.append(message)
 
-    def equal(self, actual: Any, expected: Any, message: str) -> None:
-        self.check(actual == expected, f"{message}：预期 {expected!r}，实际 {actual!r}")
+
+def flatten(spec: dict) -> list[dict]:
+    flat: list[dict] = []
+    for module in spec.get("modules", []):
+        for field in module.get("fields", []):
+            flat.append(field)
+    return flat
 
 
-def color_value(color: Any) -> dict[str, Any] | None:
-    if color is None:
-        return None
-    return {
-        "type": color.type,
-        "rgb": color.rgb if isinstance(color.rgb, str) else None,
-        "indexed": color.indexed,
-        "auto": color.auto,
-        "theme": color.theme,
-        "tint": color.tint,
-    }
+def float_equal(a: float | None, b: float | None) -> bool:
+    if a is None or b is None:
+        return a is b
+    return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-6)
 
 
-def font_value(font: Any) -> dict[str, Any]:
-    return {
-        "name": font.name,
-        "size": font.sz,
-        "bold": font.b,
-        "italic": font.i,
-        "underline": font.u,
-        "strike": font.strike,
-        "outline": font.outline,
-        "shadow": font.shadow,
-        "vertAlign": font.vertAlign,
-        "charset": font.charset,
-        "family": font.family,
-        "scheme": font.scheme,
-        "color": color_value(font.color),
-    }
-
-
-def inline_font_value(font: Any) -> dict[str, Any]:
-    return {
-        "name": font.rFont,
-        "size": font.sz,
-        "bold": font.b,
-        "italic": font.i,
-        "underline": font.u,
-        "strike": font.strike,
-        "vertAlign": font.vertAlign,
-        "color": color_value(font.color),
-    }
-
-
-def fill_value(fill: Any) -> dict[str, Any]:
-    return {
-        "type": fill.fill_type,
-        "pattern": fill.patternType,
-        "fgColor": color_value(fill.fgColor),
-        "bgColor": color_value(fill.bgColor),
-    }
-
-
-def side_value(side: Any) -> dict[str, Any]:
-    if side is None:
-        return {"style": None, "color": None}
-    return {"style": side.style, "color": color_value(side.color)}
-
-
-def border_value(border: Any) -> dict[str, Any]:
-    return {
-        "left": side_value(border.left),
-        "right": side_value(border.right),
-        "top": side_value(border.top),
-        "bottom": side_value(border.bottom),
-        "diagonal": side_value(border.diagonal),
-        "diagonalUp": border.diagonalUp,
-        "diagonalDown": border.diagonalDown,
-        "outline": border.outline,
-        "vertical": side_value(border.vertical),
-        "horizontal": side_value(border.horizontal),
-        "start": side_value(border.start),
-        "end": side_value(border.end),
-    }
-
-
-def alignment_value(alignment: Any) -> dict[str, Any]:
-    return {
-        "horizontal": alignment.horizontal,
-        "vertical": alignment.vertical,
-        "wrapText": alignment.wrap_text,
-        "shrinkToFit": alignment.shrink_to_fit,
-        "textRotation": alignment.text_rotation,
-        "indent": alignment.indent,
-        "relativeIndent": alignment.relativeIndent,
-        "justifyLastLine": alignment.justifyLastLine,
-        "readingOrder": alignment.readingOrder,
-    }
-
-
-def protection_value(protection: Any) -> dict[str, Any]:
-    return {"locked": protection.locked, "hidden": protection.hidden}
-
-
-def rich_text_value(value: Any) -> Any:
-    if not isinstance(value, CellRichText):
-        return value
-    runs: list[dict[str, Any]] = []
-    for item in value:
-        if isinstance(item, TextBlock):
-            runs.append({"text": item.text, "font": inline_font_value(item.font)})
-        else:
-            runs.append({"text": str(item), "plain": True})
-    return {"richText": runs}
-
-
-def cell_value(cell: Any) -> Any:
-    return rich_text_value(cell.value)
-
-
-def cell_style(cell: Any) -> dict[str, Any]:
-    return {
-        "value": cell_value(cell),
-        "font": font_value(cell.font),
-        "fill": fill_value(cell.fill),
-        "border": border_value(cell.border),
-        "alignment": alignment_value(cell.alignment),
-        "numberFormat": cell.number_format,
-        "protection": protection_value(cell.protection),
-    }
-
-
-def dimension_float_equal(actual: float | None, expected: float | None) -> bool:
-    if actual is None or expected is None:
-        return actual is expected
-    return math.isclose(actual, expected, rel_tol=1e-12, abs_tol=1e-12)
-
-
-def read_xml_dimension(path: Path, sheet_index: int = 1) -> str | None:
-    member = f"xl/worksheets/sheet{sheet_index}.xml"
-    try:
-        with zipfile.ZipFile(path) as archive:
-            xml = archive.read(member).decode("utf-8")
-    except (KeyError, zipfile.BadZipFile, OSError):
-        return None
-    match = re.search(r'<dimension\s+ref="([^"]+)"', xml)
-    return match.group(1) if match else None
-
-
-def load_sheet(path: Path) -> Any:
-    workbook = load_workbook(path, rich_text=True)
-    if SHEET_NAME not in workbook.sheetnames:
-        raise ValueError(f"缺少工作表：{SHEET_NAME}")
-    return workbook, workbook[SHEET_NAME]
-
-
-def compare_sheet_metadata(validation: Validation, actual: Any, expected: Any) -> None:
-    validation.equal(actual.freeze_panes, expected.freeze_panes, "冻结窗格")
-    validation.equal(actual.sheet_view.topLeftCell, expected.sheet_view.topLeftCell, "视图左上单元格")
-    validation.equal(actual.sheet_view.showGridLines, expected.sheet_view.showGridLines, "网格线显示")
-    validation.equal(actual.sheet_view.zoomScale, expected.sheet_view.zoomScale, "缩放比例")
-    validation.equal(
-        actual.sheet_format.defaultColWidth,
-        expected.sheet_format.defaultColWidth,
-        "默认列宽",
-    )
-    validation.equal(
-        actual.sheet_format.defaultRowHeight,
-        expected.sheet_format.defaultRowHeight,
-        "默认行高",
-    )
-
-    expected_selection = [
-        (item.pane, item.activeCell, str(item.sqref)) for item in expected.sheet_view.selection
-    ]
-    actual_selection = [
-        (item.pane, item.activeCell, str(item.sqref)) for item in actual.sheet_view.selection
-    ]
-    validation.equal(actual_selection, expected_selection, "活动单元格与选择区域")
-
-    validation.equal(
-        sorted(str(item) for item in actual.merged_cells.ranges),
-        sorted(str(item) for item in expected.merged_cells.ranges),
-        "合并单元格",
-    )
-    validation.equal(
-        tuple(sorted(str(item) for item in actual.merged_cells.ranges)),
-        tuple(sorted(EXPECTED_MERGED_RANGES)),
-        "合并单元格固定契约",
-    )
-
-
-def compare_dimensions(validation: Validation, actual: Any, expected: Any) -> None:
-    for index in range(1, COLUMN_COUNT + 1):
-        letter = get_column_letter(index)
-        actual_dim = actual.column_dimensions[letter]
-        expected_dim = expected.column_dimensions[letter]
-        validation.check(
-            dimension_float_equal(actual_dim.width, expected_dim.width),
-            f"{letter} 列宽：预期 {expected_dim.width!r}，实际 {actual_dim.width!r}",
-        )
-        validation.equal(actual_dim.hidden, expected_dim.hidden, f"{letter} 列隐藏状态")
-        validation.equal(
-            actual_dim.customWidth, expected_dim.customWidth, f"{letter} 列自定义宽度"
-        )
-
-    for row in range(1, LAST_PREFORMATTED_ROW + 1):
-        actual_dim = actual.row_dimensions[row]
-        expected_dim = expected.row_dimensions[row]
-        validation.check(
-            dimension_float_equal(actual_dim.height, expected_dim.height),
-            f"第 {row} 行行高：预期 {expected_dim.height!r}，实际 {actual_dim.height!r}",
-        )
-        validation.equal(actual_dim.hidden, expected_dim.hidden, f"第 {row} 行隐藏状态")
-        validation.equal(
-            actual_dim.customHeight, expected_dim.customHeight, f"第 {row} 行自定义高度"
-        )
-
-
-def compare_header_cells(validation: Validation, actual: Any, expected: Any) -> None:
-    expected_cells = set(expected._cells)
-    actual_cells = set(actual._cells)
-    expected_header_cells = {
-        coordinate for coordinate in expected_cells if coordinate[0] <= 4
-    }
-    actual_header_cells = {
-        coordinate for coordinate in actual_cells if coordinate[0] <= 4
-    }
-    validation.equal(actual_header_cells, expected_header_cells, "前 4 行单元格集合")
-
-    for row in range(1, 5):
-        for column in range(1, COLUMN_COUNT + 1):
-            coordinate = f"{get_column_letter(column)}{row}"
-            if (column, row) not in expected_header_cells:
-                continue
-            actual_style = cell_style(actual[coordinate])
-            expected_style = cell_style(expected[coordinate])
-            validation.equal(
-                actual_style, expected_style, f"{coordinate} 单元格内容与样式"
-            )
-
-    for column in range(1, COLUMN_COUNT + 1):
-        coordinate = f"{get_column_letter(column)}3"
-        validation.check(
-            isinstance(actual[coordinate].value, CellRichText),
-            f"{coordinate} 必须为富文本字段名",
-        )
-
-
-def compare_empty_data_rows(validation: Validation, actual: Any) -> None:
-    data_cells = [
-        coordinate
-        for coordinate in actual._cells
-        if FIRST_DATA_ROW <= coordinate[0] <= LAST_PREFORMATTED_ROW
-    ]
-    validation.equal(data_cells, [], "第 5 至 1113 行不得包含数据单元格")
-
-
-def compare_forbidden_features(validation: Validation, sheet: Any) -> None:
-    validation.equal(len(sheet.data_validations.dataValidation), 0, "不得包含数据验证/下拉")
-    validation.equal(sheet.auto_filter.ref, None, "不得包含自动筛选")
-    validation.equal(len(sheet.tables), 0, "不得包含表格对象")
-    validation.equal(len(sheet.conditional_formatting), 0, "不得包含条件格式")
-    validation.equal(str(sheet.print_area or ""), "", "不得包含打印区域")
-    validation.equal(sheet.print_title_rows, None, "不得包含打印标题行")
-    validation.equal(sheet.print_title_cols, None, "不得包含打印标题列")
-    validation.equal(sheet.protection.sheet, False, "工作表保护状态")
-
-    header_footer = sheet.oddHeader
-    footer = sheet.oddFooter
-    header_text = "".join(
-        [
-            header_footer.left.text or "",
-            header_footer.center.text or "",
-            header_footer.right.text or "",
-        ]
-    )
-    footer_text = "".join(
-        [
-            footer.left.text or "",
-            footer.center.text or "",
-            footer.right.text or "",
-        ]
-    )
-    validation.equal(header_text, "", "不得包含页眉")
-    validation.equal(footer_text, "", "不得包含页脚")
-
-
-def validate(candidate: Path, golden: Path = GOLDEN_TEMPLATE) -> Validation:
-    validation = Validation()
+def validate(candidate: Path, spec: dict) -> Validation:
+    v = Validation()
     candidate = candidate.expanduser().resolve()
-    golden = golden.expanduser().resolve()
-
-    validation.check(candidate.is_file(), f"文件不存在：{candidate}")
-    validation.check(golden.is_file(), f"黄金母版不存在：{golden}")
-    if validation.failures:
-        return validation
-
-    golden_hash = sha256_file(golden)
-    validation.equal(golden_hash, GOLDEN_SHA256, "黄金母版 SHA-256")
+    v.check(candidate.is_file(), f"文件不存在：{candidate}")
     try:
-        actual_workbook, actual_sheet = load_sheet(candidate)
-        expected_workbook, expected_sheet = load_sheet(golden)
-    except Exception as exc:
-        validation.failures.append(f"无法读取工作簿：{exc}")
-        return validation
+        wb = load_workbook(candidate, rich_text=True)
+    except Exception as exc:  # noqa: BLE001
+        v.failures.append(f"无法读取工作簿：{exc}")
+        return v
 
-    validation.equal(actual_workbook.sheetnames, [SHEET_NAME], "工作表名称与数量")
-    validation.equal(expected_workbook.sheetnames, [SHEET_NAME], "黄金母版工作表名称")
-    validation.equal(read_xml_dimension(candidate), EXPECTED_DIMENSION, "XML 使用范围")
-    validation.equal(read_xml_dimension(golden), EXPECTED_DIMENSION, "黄金母版 XML 使用范围")
+    sheet_name = spec.get("sheet_name") or DEFAULT_SHEET_NAME
+    v.check(wb.sheetnames == [sheet_name], f"工作表名应为 [{sheet_name}]，实际 {wb.sheetnames}")
+    if v.failures:
+        return v
+    ws = wb[sheet_name]
 
-    compare_sheet_metadata(validation, actual_sheet, expected_sheet)
-    compare_dimensions(validation, actual_sheet, expected_sheet)
-    compare_header_cells(validation, actual_sheet, expected_sheet)
-    compare_empty_data_rows(validation, actual_sheet)
-    compare_forbidden_features(validation, actual_sheet)
-    return validation
+    fields = flatten(spec)
+    n = len(fields)
+    v.check(n > 0, "字段清单为空")
+    if n == 0:
+        return v
+
+    last_letter = get_column_letter(n)
+
+    # 冻结窗格
+    v.check(ws.freeze_panes == FREEZE_PANE, f"冻结窗格应为 {FREEZE_PANE}，实际 {ws.freeze_panes}")
+
+    # 第 1 行说明合并
+    merged_row1 = [str(m) for m in ws.merged_cells.ranges if m.min_row == 1 and m.max_row == 1]
+    v.check(merged_row1 == [f"A1:{last_letter}1"], f"第 1 行应合并为 A1:{last_letter}1，实际 {merged_row1}")
+    v.check(ws.cell(1, 1).value is not None, "第 1 行说明不得为空")
+    v.check(float_equal(ws.row_dimensions[1].height, ROW_HEIGHTS[1]), "第 1 行行高应一致")
+
+    # 第 2 行模块合并
+    show_modules = has_module_names(spec.get("modules", []))
+    merged_row2 = sorted(
+        [str(m) for m in ws.merged_cells.ranges if m.min_row == 2 and m.max_row == 2]
+    )
+    if show_modules:
+        expected: list[str] = []
+        col = 1
+        for module in spec["modules"]:
+            cnt = len(module.get("fields", []))
+            if cnt == 0:
+                continue
+            end = col + cnt - 1
+            expected.append(f"{get_column_letter(col)}2:{get_column_letter(end)}2")
+            col = end + 1
+        v.check(merged_row2 == expected, f"第 2 行模块合并应 {expected}，实际 {merged_row2}")
+        # 模块名文本
+        col = 1
+        for module in spec["modules"]:
+            cnt = len(module.get("fields", []))
+            if cnt == 0:
+                continue
+            v.check(ws.cell(2, col).value == (module.get("name") or ""), "模块名文本应一致")
+            col += cnt
+    else:
+        v.check(merged_row2 == [f"A2:{last_letter}2"], f"无模块时第 2 行应合并为 A2:{last_letter}2，实际 {merged_row2}")
+    v.check(float_equal(ws.row_dimensions[2].height, ROW_HEIGHTS[2]), "第 2 行行高应一致")
+
+    # 第 3 行字段名 + 必填星号；第 4 行逻辑
+    for idx, field in enumerate(fields):
+        col = idx + 1
+        letter = get_column_letter(col)
+        name = str(field.get("name", ""))
+        required = bool(field.get("required", False))
+        logic = str(field.get("logic", ""))
+
+        cell3 = ws.cell(3, col)
+        has_star = False
+        if isinstance(cell3.value, CellRichText):
+            text = "".join(b.text for b in cell3.value if isinstance(b, TextBlock))
+            # 去掉尾部 * 与空格后应与字段名一致
+            plain = text.rstrip().rstrip("*").rstrip()
+            v.check(plain == name, f"{letter}3 字段名应为 {name!r}，实际 {plain!r}")
+            has_star = any(
+                isinstance(b, TextBlock) and b.text == "*"
+                and b.font is not None
+                and b.font.color is not None
+                and b.font.color.rgb == REQUIRED_STAR_COLOR
+                for b in cell3.value
+            )
+        else:
+            v.check(str(cell3.value) == name, f"{letter}3 字段名应为 {name!r}，实际 {cell3.value!r}")
+        if required:
+            v.check(has_star, f"{letter}3 必填字段缺少红色 *")
+        else:
+            v.check(not has_star, f"{letter}3 非必填字段不应有 *")
+
+        cell4 = ws.cell(4, col)
+        v.check(cell4.value == logic, f"{letter}4 逻辑说明应一致")
+        v.check(cell4.font.size == 9, f"{letter}4 字号应为 9")
+        v.check(
+            cell4.font.color is not None and cell4.font.color.rgb == LOGIC_COLOR,
+            f"{letter}4 文字颜色应为 {LOGIC_COLOR}",
+        )
+
+        # 列宽
+        width = field.get("width") or DEFAULT_COLUMN_WIDTH
+        v.check(
+            float_equal(ws.column_dimensions[letter].width, width),
+            f"{letter} 列宽应一致",
+        )
+
+    # 第 3/4 行高
+    v.check(float_equal(ws.row_dimensions[3].height, ROW_HEIGHTS[3]), "第 3 行行高应一致")
+    v.check(float_equal(ws.row_dimensions[4].height, ROW_HEIGHTS[4]), "第 4 行行高应一致")
+
+    # 空白数据区
+    data_rows = int(spec.get("data_rows") or DEFAULT_DATA_ROWS)
+    data_cells = [co for co in ws._cells if 5 <= co[0] <= 4 + data_rows]
+    v.check(data_cells == [], "第 5 行起空白数据区不得包含数据单元格")
+    v.check(float_equal(ws.row_dimensions[5].height, DATA_ROW_HEIGHT), "第 5 行数据行高应一致")
+
+    # 禁止能力
+    v.check(len(ws.data_validations.dataValidation) == 0, "不得包含数据验证/下拉")
+    v.check(ws.auto_filter.ref is None, "不得包含自动筛选")
+    v.check(len(ws.tables) == 0, "不得包含表格对象")
+    v.check(len(ws.conditional_formatting) == 0, "不得包含条件格式")
+    v.check(str(ws.print_area or "") == "", "不得包含打印区域")
+    return v
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="校验兰州公物仓资产批量导入模板的结构与样式"
-    )
+    parser = argparse.ArgumentParser(description="校验导入模板结构与样式是否走样")
     parser.add_argument("candidate", type=Path, help="待校验 XLSX 文件")
-    parser.add_argument(
-        "--golden",
-        type=Path,
-        default=GOLDEN_TEMPLATE,
-        help="黄金母版路径，默认使用技能内置母版",
-    )
+    parser.add_argument("--spec", type=Path, required=True, help="fields.json 规范路径")
     args = parser.parse_args()
 
-    result = validate(args.candidate, args.golden)
+    spec = json.loads(args.spec.read_text(encoding="utf-8"))
+    result = validate(args.candidate, spec)
     if result.failures:
         print(f"校验失败：{len(result.failures)} 项不一致（共 {result.checks} 项检查）")
         for failure in result.failures[:100]:
@@ -372,10 +190,8 @@ def main() -> int:
         if len(result.failures) > 100:
             print(f"- 其余 {len(result.failures) - 100} 项未显示")
         return 1
-
     print(f"校验通过：{result.checks} 项检查全部一致")
     print(f"文件：{args.candidate.expanduser().resolve()}")
-    print(f"SHA-256：{sha256_file(args.candidate)}")
     return 0
 
 

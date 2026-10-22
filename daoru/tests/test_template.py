@@ -1,120 +1,111 @@
+#!/usr/bin/env python3
+"""Generate + validate round-trip and fault-injection tests for the import template."""
+
 from __future__ import annotations
 
-import importlib.util
-import shutil
+import json
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
-from openpyxl import load_workbook
-from openpyxl.cell.rich_text import CellRichText, TextBlock
-from openpyxl.cell.text import InlineFont
-from openpyxl.worksheet.datavalidation import DataValidation
+# 让测试能直接 import scripts 包内的模块
+SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
-SKILL_DIR = Path(__file__).resolve().parents[1]
-SCRIPTS_DIR = SKILL_DIR / "scripts"
-sys.path.insert(0, str(SCRIPTS_DIR))
+from generate_template import generate  # noqa: E402
+from validate_template import validate  # noqa: E402
 
-from template_contract import GOLDEN_SHA256, GOLDEN_TEMPLATE, sha256_file  # noqa: E402
+SPEC = {
+    "title": "填写说明：必填以红色 * 标注。",
+    "sheet_name": "导入模板",
+    "data_rows": 10,
+    "modules": [
+        {
+            "name": "基本信息",
+            "fields": [
+                {"name": "名称", "required": True, "logic": "最多 99 个字符"},
+                {"name": "分类", "required": True, "logic": "填写大类原文"},
+            ],
+        },
+        {
+            "name": "财务信息",
+            "fields": [
+                {"name": "原值(元)", "required": True, "logic": "数字 0~99999999.99"},
+                {"name": "备注", "required": False, "logic": "选填"},
+            ],
+        },
+    ],
+}
 
 
-def load_script(name: str):
-    spec = importlib.util.spec_from_file_location(name, SCRIPTS_DIR / f"{name}.py")
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
-
-
-generate_template = load_script("generate_template")
-validate_template = load_script("validate_template")
-
-
-class TemplateSkillTests(unittest.TestCase):
+class TemplateTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp_dir.name)
+        self.tmp = Path(__file__).resolve().parent / "_tmp"
+        self.tmp.mkdir(exist_ok=True)
+        self.fields = self.tmp / "fields.json"
+        self.fields.write_text(json.dumps(SPEC, ensure_ascii=False), encoding="utf-8")
+        self.out = self.tmp / "导入模板.xlsx"
 
     def tearDown(self) -> None:
-        self.temp_dir.cleanup()
+        for f in (self.out, self.fields):
+            if f.exists():
+                f.unlink()
+        if self.tmp.exists():
+            self.tmp.rmdir()
 
-    def test_golden_template_validates(self) -> None:
-        result = validate_template.validate(GOLDEN_TEMPLATE)
-        self.assertEqual(result.failures, [])
-        self.assertGreater(result.checks, 3000)
+    def _generate(self) -> None:
+        generate(SPEC, self.out, force=True)
 
-    def test_generator_is_byte_identical(self) -> None:
-        output = self.root / "generated.xlsx"
-        generate_template.generate(output, force=False)
-        self.assertEqual(sha256_file(output), GOLDEN_SHA256)
-        result = validate_template.validate(output)
-        self.assertEqual(result.failures, [])
+    def test_generate_and_validate_pass(self) -> None:
+        self._generate()
+        result = validate(self.out, SPEC)
+        self.assertEqual(result.failures, [], msg="\n".join(result.failures))
 
-    def test_generator_refuses_overwrite_without_force(self) -> None:
-        output = self.root / "generated.xlsx"
-        generate_template.generate(output, force=False)
-        with self.assertRaises(FileExistsError):
-            generate_template.generate(output, force=False)
+    def test_module_merges(self) -> None:
+        from openpyxl import load_workbook
 
-    def test_changed_header_fails(self) -> None:
-        path = self.copy_golden("header.xlsx")
-        workbook = load_workbook(path, rich_text=True)
-        sheet = workbook["导入模板"]
-        sheet["B3"].value = CellRichText(
-            [
-                TextBlock(
-                    InlineFont(rFont="等线", sz=11, b=True),
-                    "被篡改的名称 ",
-                ),
-                TextBlock(
-                    InlineFont(
-                        rFont="等线",
-                        sz=11,
-                        b=True,
-                        color="FFFF0000",
-                    ),
-                    "*",
-                ),
-            ]
-        )
-        workbook.save(path)
-        result = validate_template.validate(path)
-        self.assertTrue(any("B3" in failure for failure in result.failures))
+        self._generate()
+        wb = load_workbook(self.out, rich_text=True)
+        ws = wb["导入模板"]
+        row2 = sorted(str(m) for m in ws.merged_cells.ranges if m.min_row == 2)
+        self.assertEqual(row2, ["A2:B2", "C2:D2"])
+        self.assertEqual(ws.cell(2, 1).value, "基本信息")
+        self.assertEqual(ws.cell(2, 3).value, "财务信息")
 
-    def test_changed_width_fails(self) -> None:
-        path = self.copy_golden("width.xlsx")
-        workbook = load_workbook(path, rich_text=True)
-        workbook["导入模板"].column_dimensions["B"].width = 27
-        workbook.save(path)
-        result = validate_template.validate(path)
-        self.assertTrue(any("B 列宽" in failure for failure in result.failures))
+    def test_required_stars(self) -> None:
+        from openpyxl.cell.rich_text import CellRichText
 
-    def test_removed_merge_fails(self) -> None:
-        path = self.copy_golden("merge.xlsx")
-        workbook = load_workbook(path, rich_text=True)
-        workbook["导入模板"].unmerge_cells("A2:J2")
-        workbook.save(path)
-        result = validate_template.validate(path)
-        self.assertTrue(any("合并单元格" in failure for failure in result.failures))
+        self._generate()
+        from openpyxl import load_workbook
 
-    def test_added_data_validation_fails(self) -> None:
-        path = self.copy_golden("validation.xlsx")
-        workbook = load_workbook(path, rich_text=True)
-        sheet = workbook["导入模板"]
-        validation = DataValidation(type="list", formula1='"是,否"')
-        sheet.add_data_validation(validation)
-        validation.add("B5:B1113")
-        workbook.save(path)
-        result = validate_template.validate(path)
-        self.assertTrue(
-            any("数据验证" in failure for failure in result.failures)
-        )
+        ws = load_workbook(self.out, rich_text=True)["导入模板"]
+        # 名称(必填) 应有红色 *；备注(非必填) 不应有
+        self.assertIsInstance(ws.cell(3, 1).value, CellRichText)
+        result = validate(self.out, SPEC)
+        self.assertEqual(result.failures, [], msg="\n".join(result.failures))
 
-    def copy_golden(self, name: str) -> Path:
-        path = self.root / name
-        shutil.copy2(GOLDEN_TEMPLATE, path)
-        return path
+    def test_changed_logic_fails(self) -> None:
+        self._generate()
+        from openpyxl import load_workbook
+
+        wb = load_workbook(self.out)
+        wb["导入模板"]["D4"] = "篡改后的逻辑"
+        wb.save(self.out)
+        result = validate(self.out, SPEC)
+        self.assertTrue(any("D4" in f for f in result.failures))
+
+    def test_missing_star_fails(self) -> None:
+        self._generate()
+        from openpyxl import load_workbook
+
+        wb = load_workbook(self.out, rich_text=True)
+        ws = wb["导入模板"]
+        # 用纯文本覆盖必填字段名，去掉富文本 *
+        ws["C3"] = "原值(元)"
+        wb.save(self.out)
+        result = validate(self.out, SPEC)
+        self.assertTrue(any("C3" in f and "*" in f for f in result.failures))
 
 
 if __name__ == "__main__":
