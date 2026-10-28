@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Frame UI 12 套主题圆角落地（Arco Design Vue 2.59.0）
+
+   引入顺序：
+     @arco-design/web-vue/dist/arco.css
+     <skill>/assets/frame-presets.css      ← 基础档位与通用覆盖
+     <skill>/assets/frame-themes.css       ← 本文件，按主题覆盖
+
+   启用方式：给 body 加 data-frame-theme：
+     document.body.dataset.frameTheme = 'semi';   // body[data-frame-theme='semi']
+
+   只做 CSS 能做到的三件事：圆角、按钮尺寸/字重、主按钮投影强度。
+   主色一律走构建期 modifyVars 改 `arcoblue-6`（自动派生 10 阶），
+   不要在 CSS 里只改 --primary-6，否则 hover/active 会串色。
+
+   映射规则（统一口径，避免逐主题拍脑袋）：
+     --border-radius-small  = 控件（按钮/输入/标签/复选/分页项）
+     --border-radius-medium = 下拉/选择器浮层（跟输入圆角，不跟弹窗）
+     --frame-radius-card    = 卡片
+     .arco-modal            = 弹窗（多数主题与卡片同档，科技蓝/电光玻璃例外）
+   ========================================================================== */
+
+/* ---------- 1. SemiDesign（企业中后台默认） ---------- */
+body[data-frame-theme='semi'] {
+  --border-radius-small: 3px;
+  --border-radius-medium: 6px;
+  --border-radius-large: 6px;
+  --frame-radius-card: 12px;
+  --frame-primary-shadow: 0 2px 8px rgba(0, 100, 250, 0.22);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(0, 100, 250, 0.28);
+}
+
+body[data-frame-theme='semi'] .arco-modal {
+  border-radius: 12px;
+}
+
+/* ---------- 2. 亮色现代极简 ---------- */
+body[data-frame-theme='minimal'] {
+  --border-radius-small: 10px;
+  --border-radius-medium: 14px;
+  --frame-radius-card: 16px;
+  --frame-primary-shadow: 0 2px 8px rgba(28, 31, 35, 0.16);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(28, 31, 35, 0.22);
+}
+
+body[data-frame-theme='minimal'] .arco-modal {
+  border-radius: 16px;
+}
+
+/* 小控件（复选框/开关）跟随 sm 档，别被 10px 拉圆 */
+body[data-frame-theme='minimal'] .arco-checkbox-icon,
+body[data-frame-theme='minimal'] .arco-radio-icon {
+  border-radius: 4px;
+}
+
+/* ---------- 3. 亮色电光蓝 ---------- */
+body[data-frame-theme='electric-blue'] {
+  --border-radius-small: 10px;
+  --border-radius-medium: 14px;
+  --frame-radius-card: 18px;
+  --frame-primary-shadow: 0 2px 8px rgba(56, 189, 248, 0.28);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(56, 189, 248, 0.34);
+}
+
+body[data-frame-theme='electric-blue'] .arco-modal {
+  border-radius: 18px;
+}
+
+/* ---------- 4. 亮色科技蓝（消费向 H5，不用于政务企业中后台） ---------- */
+body[data-frame-theme='tech-blue'] {
+  --border-radius-small: 16px;
+  --border-radius-medium: 16px;
+  --frame-radius-card: 20px;
+  --frame-primary-shadow: 0 10px 25px rgba(76, 117, 242, 0.3);
+  --frame-primary-shadow-hover: 0 14px 32px rgba(76, 117, 242, 0.36);
+}
+
+body[data-frame-theme='tech-blue'] .arco-modal {
+  border-radius: 24px;
+}
+
+body[data-frame-theme='tech-blue'] .arco-btn {
+  border-radius: 18px;
+}
+
+body[data-frame-theme='tech-blue'] .arco-btn-size-small {
+  border-radius: 12px;
+}
+
+body[data-frame-theme='tech-blue'] .arco-tag {
+  border-radius: 999px;
+}
+
+/* ---------- 5. 绯雾轻写 ---------- */
+body[data-frame-theme='coral'] {
+  --border-radius-small: 6px;
+  --border-radius-medium: 14px;
+  --frame-radius-card: 16px;
+  --frame-primary-shadow: 0 2px 8px rgba(231, 76, 60, 0.22);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(231, 76, 60, 0.28);
+}
+
+body[data-frame-theme='coral'] .arco-modal {
+  border-radius: 16px;
+}
+
+body[data-frame-theme='coral'] .arco-btn {
+  border-radius: 12px;
+}
+
+body[data-frame-theme='coral'] .arco-input-wrapper,
+body[data-frame-theme='coral'] .arco-select-view,
+body[data-frame-theme='coral'] .arco-textarea-wrapper {
+  border-radius: 14px;
+}
+
+/* ---------- 6. 暗粉霓虹潮 ---------- */
+body[data-frame-theme='neon-pink'] {
+  --border-radius-small: 2px;
+  --border-radius-medium: 4px;
+  --frame-radius-card: 6px;
+  --frame-primary-shadow: 0 2px 8px rgba(219, 100, 168, 0.25);
+  --frame-primary-shadow-hover: 0 8px 20px rgba(219, 100, 168, 0.3);
+}
+
+body[data-frame-theme='neon-pink'] .arco-modal {
+  border-radius: 6px;
+}
+
+body[data-frame-theme='neon-pink'] .arco-tag {
+  border-radius: 100px;
+}
+
+/* ---------- 7. 暗紫色科技感 ---------- */
+body[data-frame-theme='violet'] {
+  --border-radius-small: 10px;
+  --border-radius-medium: 12px;
+  --frame-radius-card: 20px;
+  --frame-primary-shadow: 0 2px 8px rgba(165, 115, 255, 0.22);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(165, 115, 255, 0.28);
+}
+
+body[data-frame-theme='violet'] .arco-modal {
+  border-radius: 20px;
+}
+
+/* ---------- 8. 暗色低饱和黑灰（数据密集） ---------- */
+body[data-frame-theme='graphite'] {
+  --border-radius-small: 10px;
+  --border-radius-medium: 14px;
+  --frame-radius-card: 18px;
+  --frame-primary-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+body[data-frame-theme='graphite'] .arco-modal {
+  border-radius: 18px;
+}
+
+/* ---------- 9. 暗黑亮青发光 ---------- */
+body[data-frame-theme='cyan-glow'] {
+  --border-radius-small: 6px;
+  --border-radius-medium: 6px;
+  --frame-radius-card: 24px;
+  --frame-primary-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25);
+  --frame-primary-shadow-hover: 0 0 16px rgba(34, 211, 238, 0.28);
+}
+
+body[data-frame-theme='cyan-glow'] .arco-modal {
+  border-radius: 18px;
+}
+
+/* ---------- 10. 暗黑荧光绿 ---------- */
+body[data-frame-theme='lime'] {
+  --border-radius-small: 6px;
+  --border-radius-medium: 6px;
+  --frame-radius-card: 24px;
+  --frame-primary-shadow: 0 0 0 1px rgba(194, 230, 0, 0.22);
+  --frame-primary-shadow-hover: 0 0 14px rgba(194, 230, 0, 0.24);
+}
+
+body[data-frame-theme='lime'] .arco-modal {
+  border-radius: 18px;
+}
+
+/* ---------- 11. 电光玻璃（玻璃只做装饰，弹窗/表单/表格必须实色） ---------- */
+body[data-frame-theme='glass'] {
+  --border-radius-small: 16px;
+  --border-radius-medium: 24px;
+  --frame-radius-card: 24px;
+  --frame-primary-shadow: 0 6px 20px rgba(147, 72, 212, 0.25);
+  --frame-primary-shadow-hover: 0 12px 30px rgba(147, 72, 212, 0.3);
+}
+
+body[data-frame-theme='glass'] .arco-modal {
+  border-radius: 24px;
+  /* 面板必须实色：禁止 backdrop-filter / 半透明底 */
+  background-color: var(--color-bg-3);
+}
+
+/* ---------- 12. 焦糖暗艺 ---------- */
+body[data-frame-theme='caramel'] {
+  --border-radius-small: 8px;
+  --border-radius-medium: 12px;
+  --frame-radius-card: 18px;
+  --frame-primary-shadow: 0 2px 8px rgba(255, 154, 90, 0.22);
+  --frame-primary-shadow-hover: 0 10px 25px rgba(255, 154, 90, 0.26);
+}
+
+body[data-frame-theme='caramel'] .arco-modal {
+  border-radius: 18px;
+}
+
+body[data-frame-theme='caramel'] .arco-tag {
+  border-radius: 6px;
+}
+
+/* ---------- 通用：小控件不要被控件档位拉成胶囊 ---------- */
+body[data-frame-theme='tech-blue'] .arco-checkbox-icon,
+body[data-frame-theme='tech-blue'] .arco-radio-icon,
+body[data-frame-theme='glass'] .arco-checkbox-icon,
+body[data-frame-theme='glass'] .arco-radio-icon {
+  border-radius: 4px;
+}

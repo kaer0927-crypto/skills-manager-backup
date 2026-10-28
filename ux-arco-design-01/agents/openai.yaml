@@ -1,0 +1,7 @@
+interface:
+  display_name: "UX Arco Design 01"
+  short_description: "中后台界面生产规范：Arco Design Vue + 12 套主题 + 业务规则"
+  default_prompt: "Use $ux-arco-design-01 to build or refactor an admin interface with Arco Design Vue, following the skill's page skeletons, themes, and business rules."
+
+policy:
+  allow_implicit_invocation: true
