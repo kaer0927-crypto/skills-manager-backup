@@ -1,6 +1,6 @@
 ---
 name: ux-arco-design-01
-description: UX Arco Design 01（原 vibepm-frame-ui）——基于 VibePM / Frame「中后台原型及前端交付解决方案」组件库的前端界面生产规范。当需要生产或改造前端界面——中后台/管理后台/Web 产品页/登录页/看板/列表/表单/详情/移动端页面——且要求遵循该模板的组件规范与 UI 风格时使用；也适用于用户提到「按 Frame / vibepm 模板做」「用 vibepm 风格」「中后台原型」「Vibecoding 组件调用」等场景。使用本 Skill 可拿到完整的组件索引（后台 50 页 + 移动端 8 壳）、12 套视觉主题规范（设计 Tokens/提示词包/防跑偏约束）与源项目引用，保证其他 agent 产出的前端界面与模板保持一致的组件体系和 UI 风格。**本 Skill 基于 Arco Design Vue 构建，所有实现必须同时遵守 Arco 原生组件规范和 Vibepm 业务规则**。
+description: UX Arco Design 01——基于 VibePM / Frame「中后台原型及前端交付解决方案」组件库的前端界面生产规范。当需要生产或改造前端界面——中后台/管理后台/Web 产品页/登录页/看板/列表/表单/详情/移动端页面——且要求遵循该模板的组件规范与 UI 风格时使用；也适用于用户提到「按 Frame / vibepm 模板做」「用 vibepm 风格」「中后台原型」「Vibecoding 组件调用」等场景。使用本 Skill 可拿到完整的组件索引（后台 50 页 + 移动端 8 壳）、12 套视觉主题规范（设计 Tokens/提示词包/防跑偏约束）与源项目引用，保证其他 agent 产出的前端界面与模板保持一致的组件体系和 UI 风格。**本 Skill 基于 Arco Design Vue 构建，所有实现必须同时遵守 Arco 原生组件规范和 Vibepm 业务规则**。
 ---
 
 # UX Arco Design 01（VibePM / Frame 中后台原型及前端交付解决方案）
