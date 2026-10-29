@@ -4,7 +4,9 @@
   "path": "ste",
   "path_key": "ste",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "任务总结输出"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/dualface/ste-zh",
