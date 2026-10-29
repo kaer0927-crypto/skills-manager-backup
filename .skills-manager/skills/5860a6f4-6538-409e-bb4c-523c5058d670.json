@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "5860a6f4-6538-409e-bb4c-523c5058d670",
+  "path": "motionsites-web-builder",
+  "path_key": "motionsites-web-builder",
+  "enabled": true,
+  "tags": [
+    "网页制作"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/Motionsites-AI/claude-skill",
+    "subpath": "plugins/motionsites-web-builder/skills/motionsites-web-builder",
+    "branch": null
+  }
+}
