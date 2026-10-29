@@ -4,7 +4,9 @@
   "path": "landing-page-design",
   "path_key": "landing-page-design",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "产品落地页"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/elayadesign/ai-design-skills",
