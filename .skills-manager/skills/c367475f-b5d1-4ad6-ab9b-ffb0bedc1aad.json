@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "c367475f-b5d1-4ad6-ab9b-ffb0bedc1aad",
+  "path": "ste",
+  "path_key": "ste",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/dualface/ste-zh",
+    "subpath": null,
+    "branch": null
+  }
+}
