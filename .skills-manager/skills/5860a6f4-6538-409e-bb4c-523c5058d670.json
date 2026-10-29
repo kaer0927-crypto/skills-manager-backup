@@ -5,7 +5,7 @@
   "path_key": "motionsites-web-builder",
   "enabled": true,
   "tags": [
-    "网页制作"
+    "产品官网制作"
   ],
   "source": {
     "type": "git",

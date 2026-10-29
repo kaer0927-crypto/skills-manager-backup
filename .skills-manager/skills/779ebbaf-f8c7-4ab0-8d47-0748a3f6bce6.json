@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "779ebbaf-f8c7-4ab0-8d47-0748a3f6bce6",
+  "path": "landing-page-design",
+  "path_key": "landing-page-design",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/elayadesign/ai-design-skills",
+    "subpath": "skills/landing-page-design",
+    "branch": null
+  }
+}
