@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "caa09601-0746-47f2-9966-a2568d3ada6d",
+  "name": "医疗",
+  "description": null,
+  "icon": "bot",
+  "sort_order": 999
+}
