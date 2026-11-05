@@ -4,7 +4,9 @@
   "path": "drawio-generator",
   "path_key": "drawio-generator",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "快速生成业务图，流程图等"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/vibepm666/drawio-generator",
