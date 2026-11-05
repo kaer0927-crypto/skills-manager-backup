@@ -4,7 +4,9 @@
   "path": "ppt-master",
   "path_key": "ppt-master",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "PPT 汇报"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "hugohe3/ppt-master/ppt-master",

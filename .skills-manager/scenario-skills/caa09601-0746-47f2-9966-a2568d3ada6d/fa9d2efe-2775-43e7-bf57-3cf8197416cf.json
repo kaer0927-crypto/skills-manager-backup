@@ -24,7 +24,7 @@
     "qoder": true,
     "trae_cn": true,
     "workbuddy": true,
-    "workbuddy_overseas": true,
+    "workbuddy_overseas": false,
     "zcode": true
   }
 }
