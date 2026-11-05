@@ -1,0 +1,36 @@
+.env
+.env.*
+!.env.example
+
+# Secrets and local credentials
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.json
+secrets.*
+
+# Generated artifacts
+output/
+dist/
+build/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+.next/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

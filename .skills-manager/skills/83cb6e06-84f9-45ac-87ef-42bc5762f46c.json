@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "83cb6e06-84f9-45ac-87ef-42bc5762f46c",
+  "path": "drawio-generator",
+  "path_key": "drawio-generator",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/vibepm666/drawio-generator",
+    "subpath": null,
+    "branch": null
+  }
+}
