@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "8e488ece-1cbd-4d5b-9177-5093565413f5",
+  "path": "cangjie-skill",
+  "path_key": "cangjie-skill",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/kangarooking/cangjie-skill",
+    "subpath": null,
+    "branch": null
+  }
+}
