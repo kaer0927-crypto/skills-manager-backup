@@ -4,7 +4,9 @@
   "path": "cangjie-skill",
   "path_key": "cangjie-skill",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "把一本书里沉淀的方法论,拆解成原子化、可被 agent 在真实场景下调用的能"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/kangarooking/cangjie-skill",
