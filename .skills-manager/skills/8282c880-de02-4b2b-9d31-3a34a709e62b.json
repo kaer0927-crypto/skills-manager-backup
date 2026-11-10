@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "8282c880-de02-4b2b-9d31-3a34a709e62b",
+  "path": "socratic-inquiry",
+  "path_key": "socratic-inquiry",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/asking/socratic-inquiry",
+    "branch": null
+  }
+}

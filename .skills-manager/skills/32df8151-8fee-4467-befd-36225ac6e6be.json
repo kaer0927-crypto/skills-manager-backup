@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "32df8151-8fee-4467-befd-36225ac6e6be",
+  "path": "fact-check",
+  "path_key": "fact-check",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/fact-check",
+    "branch": null
+  }
+}

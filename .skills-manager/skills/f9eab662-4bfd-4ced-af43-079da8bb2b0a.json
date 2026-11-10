@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "f9eab662-4bfd-4ced-af43-079da8bb2b0a",
+  "path": "expert-panel",
+  "path_key": "expert-panel",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/expert-panel",
+    "branch": null
+  }
+}

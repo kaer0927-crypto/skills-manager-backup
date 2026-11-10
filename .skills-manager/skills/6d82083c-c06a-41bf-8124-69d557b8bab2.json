@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "6d82083c-c06a-41bf-8124-69d557b8bab2",
+  "path": "life-design",
+  "path_key": "life-design",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/self-knowledge/life-design",
+    "branch": null
+  }
+}

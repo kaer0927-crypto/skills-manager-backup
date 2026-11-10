@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "a7849170-aafb-4536-b5d9-a1ee9e79c669",
+  "path": "laoyeye",
+  "path_key": "laoyeye",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/laoyeye",
+    "branch": null
+  }
+}

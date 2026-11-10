@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4f596ec1-784c-4907-b622-ff3cfb7bc0f1",
+  "path": "johari-window",
+  "path_key": "johari-window",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/asking/johari-window",
+    "branch": null
+  }
+}

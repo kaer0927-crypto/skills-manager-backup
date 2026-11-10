@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "6c511606-a7cd-4721-9358-7dd24f753bc6",
+  "path": "kaz-leader",
+  "path_key": "kaz-leader",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/doing/kaz-leader",
+    "branch": null
+  }
+}

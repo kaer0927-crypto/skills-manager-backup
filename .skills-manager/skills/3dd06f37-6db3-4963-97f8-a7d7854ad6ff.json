@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "3dd06f37-6db3-4963-97f8-a7d7854ad6ff",
+  "path": "steelman-both-sides",
+  "path_key": "steelman-both-sides",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/deciding/steelman-both-sides",
+    "branch": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "30621cd6-2768-42bc-ad62-bfdf4102ac50",
+  "path": "matt-grilling",
+  "path_key": "matt-grilling",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/asking/matt-grilling",
+    "branch": null
+  }
+}

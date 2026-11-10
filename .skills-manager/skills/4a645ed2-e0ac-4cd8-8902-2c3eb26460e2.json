@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4a645ed2-e0ac-4cd8-8902-2c3eb26460e2",
+  "path": "inversion",
+  "path_key": "inversion",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/inversion",
+    "branch": null
+  }
+}

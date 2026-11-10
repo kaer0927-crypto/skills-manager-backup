@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "8d40c36d-1cd5-4438-b893-24bc9b52181b",
+  "path": "self-framing",
+  "path_key": "self-framing",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/self-framing",
+    "branch": null
+  }
+}

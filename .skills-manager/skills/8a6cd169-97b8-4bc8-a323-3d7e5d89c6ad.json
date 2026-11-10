@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "8a6cd169-97b8-4bc8-a323-3d7e5d89c6ad",
+  "path": "minimum-experiment",
+  "path_key": "minimum-experiment",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/deciding/minimum-experiment",
+    "branch": null
+  }
+}

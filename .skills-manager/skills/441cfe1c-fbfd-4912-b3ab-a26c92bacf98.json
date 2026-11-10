@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "441cfe1c-fbfd-4912-b3ab-a26c92bacf98",
+  "path": "five-whys",
+  "path_key": "five-whys",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/five-whys",
+    "branch": null
+  }
+}

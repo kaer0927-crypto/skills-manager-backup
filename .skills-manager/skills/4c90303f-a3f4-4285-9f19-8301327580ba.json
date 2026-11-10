@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4c90303f-a3f4-4285-9f19-8301327580ba",
+  "path": "first-principles",
+  "path_key": "first-principles",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/first-principles",
+    "branch": null
+  }
+}

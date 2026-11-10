@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "c3ed7e85-b528-4539-82e0-75f7d5bcf625",
+  "path": "matt-teach",
+  "path_key": "matt-teach",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/matt-teach",
+    "branch": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "e98cfeb0-4939-4f1c-bd01-8c0b3523742d",
+  "path": "cognitive-reappraisal",
+  "path_key": "cognitive-reappraisal",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/cognitive-reappraisal",
+    "branch": null
+  }
+}

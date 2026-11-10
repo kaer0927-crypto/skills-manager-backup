@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "789c1a88-9cda-400d-8fc0-d185d483c23c",
+  "path": "hidden-talent",
+  "path_key": "hidden-talent",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/self-knowledge/hidden-talent",
+    "branch": null
+  }
+}

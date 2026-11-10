@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "b0e3ccd6-d9e0-4424-ad3b-4ffe1ce91d89",
+  "path": "traffic-light",
+  "path_key": "traffic-light",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/asking/traffic-light",
+    "branch": null
+  }
+}

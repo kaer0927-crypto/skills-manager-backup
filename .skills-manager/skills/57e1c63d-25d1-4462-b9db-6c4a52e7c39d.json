@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "57e1c63d-25d1-4462-b9db-6c4a52e7c39d",
+  "path": "carl-idea-king",
+  "path_key": "carl-idea-king",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/carl-idea-king",
+    "branch": null
+  }
+}

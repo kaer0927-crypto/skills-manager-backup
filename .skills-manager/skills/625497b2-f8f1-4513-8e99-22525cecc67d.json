@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "625497b2-f8f1-4513-8e99-22525cecc67d",
+  "path": "horizontal-vertical-analysis",
+  "path_key": "horizontal-vertical-analysis",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/horizontal-vertical-analysis",
+    "branch": null
+  }
+}

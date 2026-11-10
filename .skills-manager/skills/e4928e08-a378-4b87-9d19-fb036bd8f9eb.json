@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "e4928e08-a378-4b87-9d19-fb036bd8f9eb",
+  "path": "memory-parable",
+  "path_key": "memory-parable",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/memory-parable",
+    "branch": null
+  }
+}

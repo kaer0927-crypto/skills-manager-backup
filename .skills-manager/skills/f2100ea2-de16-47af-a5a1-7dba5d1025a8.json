@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "f2100ea2-de16-47af-a5a1-7dba5d1025a8",
+  "path": "kaz-neat-freak",
+  "path_key": "kaz-neat-freak",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/doing/kaz-neat-freak",
+    "branch": null
+  }
+}

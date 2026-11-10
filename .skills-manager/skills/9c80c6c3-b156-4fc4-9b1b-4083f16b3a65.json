@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "9c80c6c3-b156-4fc4-9b1b-4083f16b3a65",
+  "path": "implementation-intention",
+  "path_key": "implementation-intention",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/deciding/implementation-intention",
+    "branch": null
+  }
+}

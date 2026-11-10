@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "15c7cf8e-d25f-4239-8dbb-a5ce90f0f176",
+  "path": "cross-domain-borrow",
+  "path_key": "cross-domain-borrow",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/solving/cross-domain-borrow",
+    "branch": null
+  }
+}

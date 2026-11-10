@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "5eaac886-4165-4a1f-8064-5732ef7b6e91",
+  "path": "two-layer-explain",
+  "path_key": "two-layer-explain",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/two-layer-explain",
+    "branch": null
+  }
+}

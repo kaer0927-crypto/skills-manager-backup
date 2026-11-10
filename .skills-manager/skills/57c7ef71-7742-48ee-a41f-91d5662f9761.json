@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "57c7ef71-7742-48ee-a41f-91d5662f9761",
+  "path": "reverse-teardown",
+  "path_key": "reverse-teardown",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/reverse-teardown",
+    "branch": null
+  }
+}

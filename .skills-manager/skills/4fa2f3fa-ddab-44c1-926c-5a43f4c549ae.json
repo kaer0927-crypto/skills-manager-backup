@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "4fa2f3fa-ddab-44c1-926c-5a43f4c549ae",
+  "path": "eli5",
+  "path_key": "eli5",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/eli5",
+    "branch": null
+  }
+}

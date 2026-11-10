@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "6349ffa3-f469-4c60-b7f6-cb5d6b99721b",
+  "path": "parable",
+  "path_key": "parable",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/learning/parable",
+    "branch": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "61e1eb5e-7119-499b-9f27-cc6cdbeb567f",
+  "path": "opportunity-cost",
+  "path_key": "opportunity-cost",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/deciding/opportunity-cost",
+    "branch": null
+  }
+}

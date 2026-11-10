@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "34e9f3c3-0975-4c70-bb03-267faa299fb4",
+  "path": "no-fluff-output",
+  "path_key": "no-fluff-output",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/LearnPrompt/laoyeye",
+    "subpath": "skills/asking/no-fluff-output",
+    "branch": null
+  }
+}
