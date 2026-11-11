@@ -4,7 +4,9 @@
   "path": "laoyeye",
   "path_key": "laoyeye",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "提示词分发"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",
