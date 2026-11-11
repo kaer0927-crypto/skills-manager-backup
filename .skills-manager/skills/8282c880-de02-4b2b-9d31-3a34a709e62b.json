@@ -4,7 +4,9 @@
   "path": "socratic-inquiry",
   "path_key": "socratic-inquiry",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "苏格拉底式提问"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",
