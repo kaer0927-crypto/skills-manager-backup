@@ -4,7 +4,9 @@
   "path": "socratic-tutor",
   "path_key": "socratic-tutor",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "苏格拉底式教学"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/janestreet/agent_skills/",
