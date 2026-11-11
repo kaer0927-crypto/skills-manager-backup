@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "d729e309-1601-4eef-a751-d8cac4477692",
+  "path": "socratic-tutor",
+  "path_key": "socratic-tutor",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/janestreet/agent_skills/",
+    "subpath": "socratic-tutor",
+    "branch": null
+  }
+}
