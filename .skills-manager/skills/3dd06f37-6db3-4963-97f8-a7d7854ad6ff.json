@@ -4,7 +4,9 @@
   "path": "steelman-both-sides",
   "path_key": "steelman-both-sides",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "双向钢人论证"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",
