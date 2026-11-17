@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "acb94b4b-b033-4b46-9544-046c8b5700ad",
+  "path": "unslop",
+  "path_key": "unslop",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "skillssh",
+    "ref": "heydamir/unslop/unslop",
+    "subpath": "skills/unslop",
+    "branch": null
+  }
+}
