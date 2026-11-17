@@ -4,7 +4,9 @@
   "path": "unslop",
   "path_key": "unslop",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "UI 设计"
+  ],
   "source": {
     "type": "skillssh",
     "ref": "heydamir/unslop/unslop",
