@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scenario_id": "5a8e4388-6032-4b4a-9601-5111fc228e45",
-  "name": "需求分析设计",
-  "description": null,
+  "name": "需求分析",
+  "description": "需求分析",
   "icon": "plane",
   "sort_order": 999
 }
