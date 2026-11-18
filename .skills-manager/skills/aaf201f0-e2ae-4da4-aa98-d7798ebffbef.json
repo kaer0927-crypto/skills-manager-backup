@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "aaf201f0-e2ae-4da4-aa98-d7798ebffbef",
+  "path": "figma-design-to-code",
+  "path_key": "figma-design-to-code",
+  "enabled": true,
+  "tags": [
+    "Figma 设计到代码"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/figma/mcp-server-guide/tree/main/skills/figma-design-to-code",
+    "subpath": "skills/figma-design-to-code",
+    "branch": "main"
+  }
+}
