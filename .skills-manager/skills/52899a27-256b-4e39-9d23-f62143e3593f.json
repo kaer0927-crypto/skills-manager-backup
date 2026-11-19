@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "52899a27-256b-4e39-9d23-f62143e3593f",
+  "path": "lieflat-less-ai-tone",
+  "path_key": "lieflat-less-ai-tone",
+  "enabled": true,
+  "tags": [
+    "三层去 AI 味"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/larashero3-dotcom/lieflat-less-ai-tone",
+    "subpath": null,
+    "branch": null
+  }
+}
