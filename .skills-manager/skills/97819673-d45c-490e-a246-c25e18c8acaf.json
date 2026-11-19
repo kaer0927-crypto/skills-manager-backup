@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill_id": "97819673-d45c-490e-a246-c25e18c8acaf",
+  "path": "last30days",
+  "path_key": "last30days",
+  "enabled": true,
+  "tags": [],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/mvanhorn/last30days-skill",
+    "subpath": "skills/last30days",
+    "branch": null
+  }
+}
