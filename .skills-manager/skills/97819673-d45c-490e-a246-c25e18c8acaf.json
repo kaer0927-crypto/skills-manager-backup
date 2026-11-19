@@ -4,7 +4,9 @@
   "path": "last30days",
   "path_key": "last30days",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "抓取多个平台的信息汇总为简报"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/mvanhorn/last30days-skill",
