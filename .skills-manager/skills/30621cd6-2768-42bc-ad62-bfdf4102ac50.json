@@ -4,7 +4,9 @@
   "path": "matt-grilling",
   "path_key": "matt-grilling",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "追问用户直到目标确认"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",
