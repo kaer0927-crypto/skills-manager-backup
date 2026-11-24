@@ -1547,7 +1547,9 @@ def request(
         params: Optional query-string params. Values are stringified. None values
             are dropped. If ``url`` already has a query string, ``params`` is appended.
         timeout: Request timeout in seconds
-        retries: Number of retries on failure
+        retries: Maximum number of attempts (clamped to at least 1; passing
+            retries=0 executes a single attempt with no retries, including on
+            DNS failures, whereas retries>=1 honors ``retry_dns``)
         max_429_retries: Maximum 429 retries before giving up (separate cap)
         raw: If True, return raw response text instead of parsed JSON
         deadline_monotonic: Optional absolute monotonic deadline shared by all
@@ -1580,6 +1582,9 @@ def request(
     if decode_errors not in ("strict", "replace", "ignore"):
         raise ValueError(f"unsupported decode_errors mode: {decode_errors!r}")
     effective_max_bytes = MAX_RESPONSE_BYTES if max_bytes is None else max_bytes
+    if retries <= 0:
+        retry_dns = False
+        retries = 1
     if owned_get and (method != "GET" or json_data is not None):
         raise ValueError("owned transport requires a bodyless GET")
     if owned_get and deadline_monotonic is None:
@@ -1791,11 +1796,23 @@ def request(
                     **owned_kwargs,
                 )
             except bounded_get.GetLaunchError:
-                usage.cancel(charge)
+                cancel_deadline = (
+                    deadline_monotonic
+                    if deadline_monotonic is not None
+                    else time.monotonic() + min(request_timeout, usage._JOURNAL_TIMEOUT_SECONDS)
+                )
+                with usage.with_deadline(cancel_deadline):
+                    usage.cancel(charge)
                 raise
             except bounded_get.GetTimeout as exc:
                 if not exc.started:
-                    usage.cancel(charge)
+                    cancel_deadline = (
+                        deadline_monotonic
+                        if deadline_monotonic is not None
+                        else time.monotonic() + min(request_timeout, usage._JOURNAL_TIMEOUT_SECONDS)
+                    )
+                    with usage.with_deadline(cancel_deadline):
+                        usage.cancel(charge)
                 raise deadline_error() from exc
             except bounded_get.ResponseTooLarge as exc:
                 raise ResponseTooLarge(str(exc)) from exc
@@ -1865,6 +1882,13 @@ def request(
                 last_error = deadline_error()
                 break
             request_timeout = min(timeout, remaining)
+            begin_deadline = (
+                deadline_monotonic
+                if request_timeout == remaining
+                else (deadline_monotonic - remaining) + request_timeout
+            )
+        else:
+            begin_deadline = time.monotonic() + request_timeout
         try:
             if attempt > 0 and on_retry is not None:
                 on_retry()
@@ -1875,13 +1899,25 @@ def request(
                 except proxy.ProxyUnavailable as exc:
                     raise_recorded(HTTPError(f"API key proxy: {exc}", exc.status_code))
                 req.add_header(proxy.DEADLINE_HEADER, proxy.deadline_value(request_timeout))
-            charge = usage.begin_http(usage_url, method)
+            with usage.with_deadline(begin_deadline):
+                charge = usage.begin_http(usage_url, method)
             response_status, body, response_error = open_and_read_before_deadline(request_timeout)
             if body:
                 try:
-                    usage.finish(charge, json.loads(body))
+                    parsed_usage = json.loads(body)
                 except (ValueError, TypeError):
-                    pass
+                    parsed_usage = None
+                if parsed_usage is not None:
+                    finish_deadline = (
+                        deadline_monotonic
+                        if deadline_monotonic is not None
+                        else time.monotonic() + min(request_timeout, usage._JOURNAL_TIMEOUT_SECONDS)
+                    )
+                    with usage.with_deadline(finish_deadline):
+                        try:
+                            usage.finish(charge, parsed_usage)
+                        except (ValueError, TypeError):
+                            pass
             if (cancel is not None and cancel.is_set()) or (
                 deadline_monotonic is not None
                 and time.monotonic() >= deadline_monotonic
@@ -2045,9 +2081,23 @@ def post(url: str, json_data: Dict[str, Any], headers: Optional[Dict[str, str]] 
     return request("POST", url, headers=headers, json_data=json_data, **kwargs)
 
 
-def post_raw(url: str, json_data: Dict[str, Any], headers: Optional[Dict[str, str]] = None, **kwargs) -> str:
+def post_raw(
+    url: str,
+    json_data: Dict[str, Any],
+    headers: Optional[Dict[str, str]] = None,
+    decode_errors: str = "strict",
+    **kwargs,
+) -> str:
     """Make a POST request with JSON body and return raw text."""
-    return request("POST", url, headers=headers, json_data=json_data, raw=True, **kwargs)
+    return request(
+        "POST",
+        url,
+        headers=headers,
+        json_data=json_data,
+        raw=True,
+        decode_errors=decode_errors,
+        **kwargs,
+    )
 
 
 BROWSER_USER_AGENT = (
@@ -2355,6 +2405,7 @@ def reddit_keyless_get_text(
     accept: str = "*/*",
     headers: Optional[Dict[str, str]] = None,
     validate: Optional[Callable[[str], Optional[str]]] = None,
+    deadline_monotonic: Optional[float] = None,
 ) -> Optional[str]:
     """get_text for the keyless Reddit tiers, memoized per run and throttled.
 
@@ -2369,10 +2420,16 @@ def reddit_keyless_get_text(
     A rejected body is recorded into the failure sink as schema drift and the
     call returns None, so an HTTP 200 challenge page is neither reported as a
     clean empty result nor served from the memo to later streams.
+
+    ``deadline_monotonic`` bounds coalesced waiter waits, limiter acquisition,
+    and the underlying :func:`get_text` call.
     """
     cached = _reddit_memo_get(url)
     if cached is not None:
         return cached
+    if deadline_monotonic is not None and time.monotonic() >= deadline_monotonic:
+        _record_failure(DeadlineExceeded())
+        return None
     # Elect one owner per URL. A waiter whose owner failed re-enters the
     # election rather than fetching un-gated, so a failed fetch costs one
     # retry for the whole group, not one per waiter.
@@ -2381,6 +2438,9 @@ def reddit_keyless_get_text(
             cached = _REDDIT_KEYLESS_MEMO.get(url)
             if cached is not None:
                 return cached
+            if deadline_monotonic is not None and time.monotonic() >= deadline_monotonic:
+                _record_failure(DeadlineExceeded())
+                return None
             gate = _REDDIT_KEYLESS_INFLIGHT.get(url)
             owner = gate is None
             if owner:
@@ -2390,19 +2450,52 @@ def reddit_keyless_get_text(
             break
         # The owner may itself be queued in the shared bucket; wait for that
         # queue, not just for one socket timeout.
-        gate.wait(
-            timeout=timeout * max(1, retries) + reddit_keyless_wait_allowance(1)
-        )
+        wait_timeout = timeout * max(1, retries) + reddit_keyless_wait_allowance(1)
+        if deadline_monotonic is not None:
+            remaining = deadline_monotonic - time.monotonic()
+            if remaining <= 0:
+                _record_failure(DeadlineExceeded())
+                return None
+            wait_timeout = min(wait_timeout, remaining)
+        gate.wait(timeout=wait_timeout)
         cached = _reddit_memo_get(url)
         if cached is not None:
             return cached
+        if deadline_monotonic is not None and time.monotonic() >= deadline_monotonic:
+            _record_failure(DeadlineExceeded())
+            return None
     else:
         # Three failed owners in a row: give up quietly rather than pile on.
         return None
     try:
         _sync_reddit_keyless_rate()
-        REDDIT_KEYLESS_LIMITER.acquire()
-        text = get_text(url, timeout=timeout, retries=retries, accept=accept, headers=headers)
+        if deadline_monotonic is not None:
+            if time.monotonic() >= deadline_monotonic:
+                _record_failure(DeadlineExceeded())
+                return None
+            try:
+                if isinstance(REDDIT_KEYLESS_LIMITER, RateLimiter):
+                    REDDIT_KEYLESS_LIMITER.acquire(deadline_monotonic=deadline_monotonic)
+                else:
+                    REDDIT_KEYLESS_LIMITER.acquire()
+            except DeadlineExceeded as exc:
+                _record_failure(exc)
+                return None
+            remaining = deadline_monotonic - time.monotonic()
+            if remaining <= 0:
+                _record_failure(DeadlineExceeded())
+                return None
+            text = get_text(
+                url,
+                timeout=min(timeout, remaining),
+                retries=retries,
+                accept=accept,
+                headers=headers,
+                deadline_monotonic=deadline_monotonic,
+            )
+        else:
+            REDDIT_KEYLESS_LIMITER.acquire()
+            text = get_text(url, timeout=timeout, retries=retries, accept=accept, headers=headers)
         if text is not None and validate is not None:
             problem = validate(text)
             if problem:
@@ -2416,7 +2509,8 @@ def reddit_keyless_get_text(
         return text
     finally:
         with _REDDIT_KEYLESS_MEMO_LOCK:
-            _REDDIT_KEYLESS_INFLIGHT.pop(url, None)
+            if _REDDIT_KEYLESS_INFLIGHT.get(url) is gate:
+                _REDDIT_KEYLESS_INFLIGHT.pop(url, None)
         gate.set()
 
 
@@ -2426,6 +2520,7 @@ def reddit_keyless_get_text_retry_429(
     accept: str = "*/*",
     headers: Optional[Dict[str, str]] = None,
     validate: Optional[Callable[[str], Optional[str]]] = None,
+    deadline_monotonic: Optional[float] = None,
 ) -> tuple[Optional[str], Optional[str]]:
     """Limiter-throttled GET with one extra limiter-respecting retry on 429.
 
@@ -2442,25 +2537,50 @@ def reddit_keyless_get_text_retry_429(
     # 6 with 1). A keyless 429 fails fast, the lane retries once after a short
     # jittered pause through the bucket, and the memo keeps the other streams
     # from re-requesting the same URL.
+    req_timeout: float = timeout
+    if deadline_monotonic is not None:
+        remaining = deadline_monotonic - time.monotonic()
+        if remaining <= 0:
+            err = DeadlineExceeded()
+            _record_failure(err)
+            return None, str(err)
+        req_timeout = min(timeout, remaining)
     kwargs: Dict[str, Any] = {
-        "timeout": timeout,
+        "timeout": req_timeout,
         "retries": 1,
         "accept": accept,
         "headers": headers,
         "validate": validate,
     }
+    if deadline_monotonic is not None:
+        kwargs["deadline_monotonic"] = deadline_monotonic
     with capture_failures() as first:
         text = reddit_keyless_get_text(url, **kwargs)
     if text is not None:
         return text, None
     if _failures_are_429(first):
-        _sleep_reddit_429_retry()
-        with tee_failures() as second:
-            text = reddit_keyless_get_text(url, **kwargs)
-        if text is not None:
-            return text, None
-        err = second[-1] if second else (first[-1] if first else None)
-        return None, str(err) if err is not None else "no response"
+        if deadline_monotonic is not None:
+            delay = _REDDIT_429_RETRY_SLEEP_SEC + random.uniform(0.0, _REDDIT_429_RETRY_JITTER_SEC)
+            remaining = deadline_monotonic - time.monotonic()
+            if remaining > delay:
+                time.sleep(delay)
+                remaining_after = deadline_monotonic - time.monotonic()
+                if remaining_after > 0:
+                    retry_kwargs = {**kwargs, "timeout": min(timeout, remaining_after)}
+                    with tee_failures() as second:
+                        text = reddit_keyless_get_text(url, **retry_kwargs)
+                    if text is not None:
+                        return text, None
+                    err = second[-1] if second else (first[-1] if first else None)
+                    return None, str(err) if err is not None else "no response"
+        else:
+            _sleep_reddit_429_retry()
+            with tee_failures() as second:
+                text = reddit_keyless_get_text(url, **kwargs)
+            if text is not None:
+                return text, None
+            err = second[-1] if second else (first[-1] if first else None)
+            return None, str(err) if err is not None else "no response"
     for err in first:
         _record_failure(err)
     err = first[-1] if first else None
