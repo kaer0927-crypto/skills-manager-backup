@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "28bd9456-88ea-4e97-85b2-eee6a5a4f55f",
+  "path": "hyperframes",
+  "path_key": "hyperframes",
+  "enabled": true,
+  "tags": [
+    "视频制作"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "heygen-com/hyperframes/hyperframes",
+    "subpath": "skills/hyperframes",
+    "branch": null
+  }
+}

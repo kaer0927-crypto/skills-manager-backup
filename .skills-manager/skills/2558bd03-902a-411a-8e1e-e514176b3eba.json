@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "2558bd03-902a-411a-8e1e-e514176b3eba",
+  "path": "canvas-design",
+  "path_key": "canvas-design",
+  "enabled": true,
+  "tags": [
+    "海报与视觉制图"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "anthropics/skills/canvas-design",
+    "subpath": "skills/canvas-design",
+    "branch": null
+  }
+}

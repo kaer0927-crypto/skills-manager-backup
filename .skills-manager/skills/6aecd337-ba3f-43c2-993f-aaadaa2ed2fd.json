@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "6aecd337-ba3f-43c2-993f-aaadaa2ed2fd",
+  "path": "ui-ux-pro-max",
+  "path_key": "ui-ux-pro-max",
+  "enabled": true,
+  "tags": [
+    "设计智能"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max",
+    "subpath": ".claude/skills/ui-ux-pro-max",
+    "branch": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "71a90ced-324d-4ebf-af1d-09d84e07a018",
+  "path": "humanizer-zh",
+  "path_key": "humanizer-zh",
+  "enabled": true,
+  "tags": [
+    "去AI 味"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "op7418/humanizer-zh/humanizer-zh",
+    "subpath": null,
+    "branch": null
+  }
+}

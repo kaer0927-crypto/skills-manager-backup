@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "0430137d-0594-455b-9179-7407b92fdcf6",
+  "path": "spec-driven-development",
+  "path_key": "spec-driven-development",
+  "enabled": true,
+  "tags": [
+    "以规格为驱动的开发"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "addyosmani/agent-skills/spec-driven-development",
+    "subpath": "skills/spec-driven-development",
+    "branch": null
+  }
+}
