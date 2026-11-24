@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "b95c7472-26f9-4824-a3c5-513473cc938b",
+  "path": "caveman",
+  "path_key": "caveman",
+  "enabled": true,
+  "tags": [
+    "专治模型话痨"
+  ],
+  "source": {
+    "type": "skillssh",
+    "ref": "juliusbrussee/caveman/caveman",
+    "subpath": "skills/caveman",
+    "branch": null
+  }
+}
