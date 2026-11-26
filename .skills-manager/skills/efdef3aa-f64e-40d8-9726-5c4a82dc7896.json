@@ -5,8 +5,7 @@
   "path_key": "fe-scaffold",
   "enabled": true,
   "tags": [
-    "前端 Demo 搭建流水线",
-    "原型 demo"
+    "前端搭建"
   ],
   "source": {
     "type": "local",

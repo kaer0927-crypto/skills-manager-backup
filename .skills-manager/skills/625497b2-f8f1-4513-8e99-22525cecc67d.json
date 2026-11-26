@@ -4,7 +4,9 @@
   "path": "horizontal-vertical-analysis",
   "path_key": "horizontal-vertical-analysis",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "横纵分析法"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

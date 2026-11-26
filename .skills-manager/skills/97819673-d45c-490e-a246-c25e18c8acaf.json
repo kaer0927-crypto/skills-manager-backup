@@ -5,7 +5,7 @@
   "path_key": "last30days",
   "enabled": true,
   "tags": [
-    "抓取多个平台的信息汇总为简报"
+    "近30天简报"
   ],
   "source": {
     "type": "git",

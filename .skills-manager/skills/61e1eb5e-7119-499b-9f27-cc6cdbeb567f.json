@@ -4,7 +4,9 @@
   "path": "opportunity-cost",
   "path_key": "opportunity-cost",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "机会成本"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

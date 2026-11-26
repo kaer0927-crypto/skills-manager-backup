@@ -5,7 +5,7 @@
   "path_key": "storage-analyzer",
   "enabled": true,
   "tags": [
-    "macOS 只读存储分析"
+    "磁盘分析"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "humanizer-zh",
   "enabled": true,
   "tags": [
-    "去AI 味"
+    "中文润色"
   ],
   "source": {
     "type": "skillssh",

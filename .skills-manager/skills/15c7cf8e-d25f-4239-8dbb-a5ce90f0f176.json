@@ -4,7 +4,9 @@
   "path": "cross-domain-borrow",
   "path_key": "cross-domain-borrow",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "跨域借解"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

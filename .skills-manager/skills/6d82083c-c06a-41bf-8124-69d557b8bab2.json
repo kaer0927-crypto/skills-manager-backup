@@ -4,7 +4,9 @@
   "path": "life-design",
   "path_key": "life-design",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "人生设计"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

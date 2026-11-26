@@ -4,7 +4,9 @@
   "path": "kaz-leader",
   "path_key": "kaz-leader",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "卡兹任务书"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

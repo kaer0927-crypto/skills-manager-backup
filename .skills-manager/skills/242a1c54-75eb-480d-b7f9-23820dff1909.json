@@ -5,7 +5,7 @@
   "path_key": "requirements-analysis",
   "enabled": true,
   "tags": [
-    "需求分析、需求调研"
+    "需求调研"
   ],
   "source": {
     "type": "local",

@@ -4,7 +4,9 @@
   "path": "five-whys",
   "path_key": "five-whys",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "五问复盘"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

@@ -5,7 +5,7 @@
   "path_key": "spec-driven-development",
   "enabled": true,
   "tags": [
-    "以规格为驱动的开发"
+    "规格驱动"
   ],
   "source": {
     "type": "skillssh",

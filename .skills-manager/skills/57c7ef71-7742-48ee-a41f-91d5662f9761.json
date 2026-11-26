@@ -4,7 +4,9 @@
   "path": "reverse-teardown",
   "path_key": "reverse-teardown",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "反向拆解"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

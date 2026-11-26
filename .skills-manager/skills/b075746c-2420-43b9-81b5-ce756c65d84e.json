@@ -5,7 +5,7 @@
   "path_key": "prototype-design",
   "enabled": true,
   "tags": [
-    "初始化PRD 原型项目"
+    "原型初始化"
   ],
   "source": {
     "type": "local",

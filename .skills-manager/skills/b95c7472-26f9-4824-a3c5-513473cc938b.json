@@ -5,7 +5,7 @@
   "path_key": "caveman",
   "enabled": true,
   "tags": [
-    "专治模型话痨"
+    "极简输出"
   ],
   "source": {
     "type": "skillssh",

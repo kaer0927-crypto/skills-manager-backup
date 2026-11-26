@@ -5,7 +5,7 @@
   "path_key": "feedback-analysis",
   "enabled": true,
   "tags": [
-    "用户反馈分析"
+    "反馈分析"
   ],
   "source": {
     "type": "local",

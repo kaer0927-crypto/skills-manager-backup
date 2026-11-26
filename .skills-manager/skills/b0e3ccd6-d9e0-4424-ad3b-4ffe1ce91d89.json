@@ -4,7 +4,9 @@
   "path": "traffic-light",
   "path_key": "traffic-light",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "协作刹车"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

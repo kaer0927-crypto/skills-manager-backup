@@ -5,7 +5,7 @@
   "path_key": "aihot",
   "enabled": true,
   "tags": [
-    "AIHOT"
+    "AI资讯"
   ],
   "source": {
     "type": "git",

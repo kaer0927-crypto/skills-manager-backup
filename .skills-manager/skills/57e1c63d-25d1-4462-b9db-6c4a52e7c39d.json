@@ -4,7 +4,9 @@
   "path": "carl-idea-king",
   "path_key": "carl-idea-king",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "点子王"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

@@ -4,7 +4,9 @@
   "path": "two-layer-explain",
   "path_key": "two-layer-explain",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "双层解释"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

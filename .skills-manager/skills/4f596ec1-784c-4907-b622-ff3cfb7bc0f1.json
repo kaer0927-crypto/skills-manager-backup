@@ -4,7 +4,9 @@
   "path": "johari-window",
   "path_key": "johari-window",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "乔哈里窗"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

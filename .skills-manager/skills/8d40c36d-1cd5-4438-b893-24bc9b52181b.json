@@ -4,7 +4,9 @@
   "path": "self-framing",
   "path_key": "self-framing",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "自建框架"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

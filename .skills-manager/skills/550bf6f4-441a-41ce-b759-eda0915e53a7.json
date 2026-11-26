@@ -5,7 +5,7 @@
   "path_key": "typesafe-ai",
   "enabled": true,
   "tags": [
-    "jev"
+    "类型化模型"
   ],
   "source": {
     "type": "git",

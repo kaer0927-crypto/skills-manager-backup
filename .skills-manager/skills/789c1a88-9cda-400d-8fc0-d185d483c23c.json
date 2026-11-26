@@ -4,7 +4,9 @@
   "path": "hidden-talent",
   "path_key": "hidden-talent",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "天赋挖掘"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

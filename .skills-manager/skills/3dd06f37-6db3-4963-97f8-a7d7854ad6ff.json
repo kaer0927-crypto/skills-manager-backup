@@ -5,7 +5,7 @@
   "path_key": "steelman-both-sides",
   "enabled": true,
   "tags": [
-    "双向钢人论证"
+    "双向论证"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "figma-design-to-code",
   "enabled": true,
   "tags": [
-    "Figma 设计到代码"
+    "设计转代码"
   ],
   "source": {
     "type": "git",

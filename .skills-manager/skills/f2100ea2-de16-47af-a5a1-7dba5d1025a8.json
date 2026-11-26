@@ -4,7 +4,9 @@
   "path": "kaz-neat-freak",
   "path_key": "kaz-neat-freak",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "知识治理"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

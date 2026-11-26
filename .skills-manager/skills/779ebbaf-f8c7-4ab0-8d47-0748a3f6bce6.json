@@ -5,7 +5,7 @@
   "path_key": "landing-page-design",
   "enabled": true,
   "tags": [
-    "产品落地页"
+    "落地页"
   ],
   "source": {
     "type": "git",

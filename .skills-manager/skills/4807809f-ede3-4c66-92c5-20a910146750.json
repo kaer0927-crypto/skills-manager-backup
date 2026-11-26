@@ -5,7 +5,7 @@
   "path_key": "web-design-guidelines",
   "enabled": true,
   "tags": [
-    "网页设计指南"
+    "UI审查"
   ],
   "source": {
     "type": "git",

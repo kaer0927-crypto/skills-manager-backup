@@ -5,7 +5,7 @@
   "path_key": "drawio-generator",
   "enabled": true,
   "tags": [
-    "快速生成业务图，流程图等"
+    "Drawio图"
   ],
   "source": {
     "type": "git",

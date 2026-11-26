@@ -5,7 +5,7 @@
   "path_key": "project-manage",
   "enabled": true,
   "tags": [
-    "项目管理表"
+    "项目排期"
   ],
   "source": {
     "type": "local",

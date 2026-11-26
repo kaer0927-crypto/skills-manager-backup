@@ -4,7 +4,9 @@
   "path": "fact-check",
   "path_key": "fact-check",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "事实核查"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

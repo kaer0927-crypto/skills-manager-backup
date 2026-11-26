@@ -4,7 +4,9 @@
   "path": "minimum-experiment",
   "path_key": "minimum-experiment",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "最小实验"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

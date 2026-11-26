@@ -4,7 +4,9 @@
   "path": "matt-diagnosing-bugs",
   "path_key": "matt-diagnosing-bugs",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "疑难排错"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

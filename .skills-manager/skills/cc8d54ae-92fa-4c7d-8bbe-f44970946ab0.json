@@ -5,7 +5,7 @@
   "path_key": "hv-analysis",
   "enabled": true,
   "tags": [
-    "横纵分析法"
+    "横纵研报"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "nihaixia",
   "enabled": true,
   "tags": [
-    "中医"
+    "经方中医"
   ],
   "source": {
     "type": "git",

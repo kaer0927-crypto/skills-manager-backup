@@ -4,7 +4,9 @@
   "path": "expert-panel",
   "path_key": "expert-panel",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "专家会诊"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

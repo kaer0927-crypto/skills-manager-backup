@@ -4,7 +4,9 @@
   "path": "no-fluff-output",
   "path_key": "no-fluff-output",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "直给输出"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

@@ -5,7 +5,7 @@
   "path_key": "anatomy",
   "enabled": true,
   "tags": [
-    "视频制作"
+    "技术图解"
   ],
   "source": {
     "type": "git",

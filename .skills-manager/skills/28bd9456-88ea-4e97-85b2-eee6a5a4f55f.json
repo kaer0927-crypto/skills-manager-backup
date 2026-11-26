@@ -5,7 +5,7 @@
   "path_key": "hyperframes",
   "enabled": true,
   "tags": [
-    "视频制作"
+    "视频渲染"
   ],
   "source": {
     "type": "skillssh",

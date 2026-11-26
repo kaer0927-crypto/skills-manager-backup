@@ -5,8 +5,7 @@
   "path_key": "demo-design",
   "enabled": true,
   "tags": [
-    "创建与迭代产品原型 Demo",
-    "原型 demo"
+    "原型Demo"
   ],
   "source": {
     "type": "local",

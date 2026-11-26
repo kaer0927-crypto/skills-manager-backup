@@ -4,7 +4,9 @@
   "path": "memory-parable",
   "path_key": "memory-parable",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "记忆寓言"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

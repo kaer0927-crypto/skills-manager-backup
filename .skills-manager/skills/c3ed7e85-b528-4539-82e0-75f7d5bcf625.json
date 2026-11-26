@@ -4,7 +4,9 @@
   "path": "matt-teach",
   "path_key": "matt-teach",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "教学带练"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

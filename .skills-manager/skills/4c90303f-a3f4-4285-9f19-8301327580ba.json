@@ -4,7 +4,9 @@
   "path": "first-principles",
   "path_key": "first-principles",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "第一性原理"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

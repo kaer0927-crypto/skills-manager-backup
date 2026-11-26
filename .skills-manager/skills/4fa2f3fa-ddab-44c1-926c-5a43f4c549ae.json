@@ -4,7 +4,9 @@
   "path": "eli5",
   "path_key": "eli5",
   "enabled": true,
-  "tags": [],
+  "tags": [
+    "大图小字"
+  ],
   "source": {
     "type": "git",
     "ref": "https://github.com/LearnPrompt/laoyeye",

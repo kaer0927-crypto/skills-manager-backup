@@ -5,7 +5,7 @@
   "path_key": "matt-grilling",
   "enabled": true,
   "tags": [
-    "追问用户直到目标确认"
+    "方案拷问"
   ],
   "source": {
     "type": "git",

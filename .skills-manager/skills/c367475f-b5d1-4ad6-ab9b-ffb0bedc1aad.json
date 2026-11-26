@@ -5,7 +5,7 @@
   "path_key": "ste",
   "enabled": true,
   "tags": [
-    "任务总结输出"
+    "简明表达"
   ],
   "source": {
     "type": "git",
