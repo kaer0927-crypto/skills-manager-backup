@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "19ff4b4a-4ba3-40bf-9518-e94821e28bbd",
+  "name": "思维与决策",
+  "description": "第一性原理/逆向/五问法/事实核查/机会成本等思维提示语，以及认知重评、人生设计、执行意图等个人决策工具",
+  "icon": "lightbulb",
+  "sort_order": 999
+}

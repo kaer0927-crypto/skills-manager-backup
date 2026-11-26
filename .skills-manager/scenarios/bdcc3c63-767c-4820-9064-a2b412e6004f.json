@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "bdcc3c63-767c-4820-9064-a2b412e6004f",
+  "name": "教学与协作",
+  "description": "大图小字讲解、双层解释、寓言记忆、苏格拉底式教学，以及乔哈里视窗/红绿灯/直给输出等协作约束",
+  "icon": "home",
+  "sort_order": 999
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "scenario_id": "5fcd2535-13fc-45e7-a554-e98295655244",
+  "name": "工程与开发辅助",
+  "description": "draw.io 图表生成、疑难 bug 诊断、agent 任务书、知识收尾、去 AI 味改写",
+  "icon": "cpu",
+  "sort_order": 999
+}
