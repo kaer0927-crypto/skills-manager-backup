@@ -5,7 +5,7 @@
   "path_key": "meeting-minutes",
   "enabled": true,
   "tags": [
-    "会议纪要"
+    "会议转写结构化纪要"
   ],
   "source": {
     "type": "local",

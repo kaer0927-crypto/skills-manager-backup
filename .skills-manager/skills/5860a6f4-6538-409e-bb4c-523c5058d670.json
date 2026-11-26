@@ -5,7 +5,7 @@
   "path_key": "motionsites-web-builder",
   "enabled": true,
   "tags": [
-    "电影感网站"
+    "电影感网站生成"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "minimum-experiment",
   "enabled": true,
   "tags": [
-    "最小实验"
+    "最小实验低成本验证"
   ],
   "source": {
     "type": "git",

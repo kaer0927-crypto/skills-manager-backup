@@ -5,7 +5,7 @@
   "path_key": "answer-me-with-html",
   "enabled": true,
   "tags": [
-    "可视化讲解"
+    "单页HTML可视化讲解"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "opportunity-cost",
   "enabled": true,
   "tags": [
-    "机会成本"
+    "机会成本可逆性排序"
   ],
   "source": {
     "type": "git",

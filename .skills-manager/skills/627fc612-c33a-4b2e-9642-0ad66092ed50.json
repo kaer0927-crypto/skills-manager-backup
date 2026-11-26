@@ -5,7 +5,7 @@
   "path_key": "anatomy",
   "enabled": true,
   "tags": [
-    "技术图解"
+    "等距SVG原理图解"
   ],
   "source": {
     "type": "git",

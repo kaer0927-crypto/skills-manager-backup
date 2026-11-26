@@ -5,7 +5,7 @@
   "path_key": "prd-writer-01",
   "enabled": true,
   "tags": [
-    "ToB需求"
+    "ToB方法论PRD写作"
   ],
   "source": {
     "type": "local",

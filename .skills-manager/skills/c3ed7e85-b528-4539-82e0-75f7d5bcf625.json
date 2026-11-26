@@ -5,7 +5,7 @@
   "path_key": "matt-teach",
   "enabled": true,
   "tags": [
-    "教学带练"
+    "结构化教学带练"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "data-analysis",
   "enabled": true,
   "tags": [
-    "CSV分析"
+    "CSV智能分析可视化"
   ],
   "source": {
     "type": "local",

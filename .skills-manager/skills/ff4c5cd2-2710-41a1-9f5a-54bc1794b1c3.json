@@ -5,7 +5,7 @@
   "path_key": "project-manage",
   "enabled": true,
   "tags": [
-    "项目排期"
+    "PRD排期WBS生成"
   ],
   "source": {
     "type": "local",

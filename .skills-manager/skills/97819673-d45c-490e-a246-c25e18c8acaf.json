@@ -5,7 +5,7 @@
   "path_key": "last30days",
   "enabled": true,
   "tags": [
-    "近30天简报"
+    "近30天资讯简报"
   ],
   "source": {
     "type": "git",

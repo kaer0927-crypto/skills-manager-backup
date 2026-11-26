@@ -5,7 +5,7 @@
   "path_key": "caveman",
   "enabled": true,
   "tags": [
-    "极简输出"
+    "洞穴人极简输出"
   ],
   "source": {
     "type": "skillssh",

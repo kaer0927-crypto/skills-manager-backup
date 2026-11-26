@@ -5,7 +5,7 @@
   "path_key": "cognitive-reappraisal",
   "enabled": true,
   "tags": [
-    "认知重评"
+    "认知重评情绪疏导"
   ],
   "source": {
     "type": "git",

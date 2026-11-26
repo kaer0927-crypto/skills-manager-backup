@@ -5,7 +5,7 @@
   "path_key": "daoru",
   "enabled": true,
   "tags": [
-    "导入模板"
+    "Excel导入模板生成"
   ],
   "source": {
     "type": "local",

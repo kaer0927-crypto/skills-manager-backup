@@ -5,7 +5,7 @@
   "path_key": "socratic-tutor",
   "enabled": true,
   "tags": [
-    "苏格拉底教学"
+    "苏格拉底式教学测评"
   ],
   "source": {
     "type": "git",

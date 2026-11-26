@@ -5,7 +5,7 @@
   "path_key": "requirements-analysis",
   "enabled": true,
   "tags": [
-    "需求调研"
+    "需求调研与确认"
   ],
   "source": {
     "type": "local",

@@ -5,7 +5,7 @@
   "path_key": "human-writing",
   "enabled": true,
   "tags": [
-    "活人写作"
+    "活人感中文写作"
   ],
   "source": {
     "type": "git",

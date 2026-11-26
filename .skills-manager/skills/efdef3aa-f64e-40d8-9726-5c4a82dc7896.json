@@ -5,7 +5,7 @@
   "path_key": "fe-scaffold",
   "enabled": true,
   "tags": [
-    "前端搭建"
+    "前端MVP搭建流水线"
   ],
   "source": {
     "type": "local",

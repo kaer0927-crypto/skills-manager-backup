@@ -5,7 +5,7 @@
   "path_key": "gongwen",
   "enabled": true,
   "tags": [
-    "公文写作"
+    "公文DOCX规范排版"
   ],
   "source": {
     "type": "git",

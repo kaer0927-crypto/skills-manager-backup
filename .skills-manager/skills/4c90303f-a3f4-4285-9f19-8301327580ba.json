@@ -5,7 +5,7 @@
   "path_key": "first-principles",
   "enabled": true,
   "tags": [
-    "第一性原理"
+    "第一性原理重推"
   ],
   "source": {
     "type": "git",

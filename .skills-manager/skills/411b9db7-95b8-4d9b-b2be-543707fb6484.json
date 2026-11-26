@@ -5,7 +5,7 @@
   "path_key": "style-extractor",
   "enabled": true,
   "tags": [
-    "风格提取"
+    "网页视觉风格提取"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "find-skills",
   "enabled": true,
   "tags": [
-    "技能查找"
+    "技能发现与安装"
   ],
   "source": {
     "type": "skillssh",

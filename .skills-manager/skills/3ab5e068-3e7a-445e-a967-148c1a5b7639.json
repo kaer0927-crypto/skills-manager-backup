@@ -5,7 +5,7 @@
   "path_key": "operation-manual",
   "enabled": true,
   "tags": [
-    "操作手册"
+    "业务系统操作手册"
   ],
   "source": {
     "type": "local",

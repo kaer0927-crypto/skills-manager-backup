@@ -5,7 +5,7 @@
   "path_key": "kaz-leader",
   "enabled": true,
   "tags": [
-    "卡兹任务书"
+    "卡兹风格任务书"
   ],
   "source": {
     "type": "git",

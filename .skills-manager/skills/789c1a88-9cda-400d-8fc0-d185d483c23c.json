@@ -5,7 +5,7 @@
   "path_key": "hidden-talent",
   "enabled": true,
   "tags": [
-    "天赋挖掘"
+    "深度天赋挖掘对话"
   ],
   "source": {
     "type": "git",

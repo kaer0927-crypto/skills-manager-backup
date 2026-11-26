@@ -5,7 +5,7 @@
   "path_key": "memory-parable",
   "enabled": true,
   "tags": [
-    "记忆寓言"
+    "记忆寓言助记"
   ],
   "source": {
     "type": "git",

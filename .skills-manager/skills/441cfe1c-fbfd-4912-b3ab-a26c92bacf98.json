@@ -5,7 +5,7 @@
   "path_key": "five-whys",
   "enabled": true,
   "tags": [
-    "五问复盘"
+    "五问法事故复盘"
   ],
   "source": {
     "type": "git",

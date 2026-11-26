@@ -5,7 +5,7 @@
   "path_key": "traffic-light",
   "enabled": true,
   "tags": [
-    "协作刹车"
+    "红绿灯协作刹车"
   ],
   "source": {
     "type": "git",

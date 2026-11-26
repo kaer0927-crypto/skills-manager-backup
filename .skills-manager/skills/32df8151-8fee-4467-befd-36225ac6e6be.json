@@ -5,7 +5,7 @@
   "path_key": "fact-check",
   "enabled": true,
   "tags": [
-    "事实核查"
+    "事实核查五档可信度"
   ],
   "source": {
     "type": "git",

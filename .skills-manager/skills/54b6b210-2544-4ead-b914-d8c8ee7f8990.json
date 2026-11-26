@@ -5,7 +5,7 @@
   "path_key": "matt-diagnosing-bugs",
   "enabled": true,
   "tags": [
-    "疑难排错"
+    "疑难Bug诊断循环"
   ],
   "source": {
     "type": "git",

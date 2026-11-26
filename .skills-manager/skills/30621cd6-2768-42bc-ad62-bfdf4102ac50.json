@@ -5,7 +5,7 @@
   "path_key": "matt-grilling",
   "enabled": true,
   "tags": [
-    "方案拷问"
+    "方案拷问压力测试"
   ],
   "source": {
     "type": "git",

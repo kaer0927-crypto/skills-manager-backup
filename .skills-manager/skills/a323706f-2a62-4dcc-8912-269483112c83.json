@@ -5,7 +5,7 @@
   "path_key": "storage-analyzer",
   "enabled": true,
   "tags": [
-    "磁盘分析"
+    "磁盘占用只读分析"
   ],
   "source": {
     "type": "git",

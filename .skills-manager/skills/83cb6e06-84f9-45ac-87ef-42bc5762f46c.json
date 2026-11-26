@@ -5,7 +5,7 @@
   "path_key": "drawio-generator",
   "enabled": true,
   "tags": [
-    "Drawio图"
+    "Drawio图表生成"
   ],
   "source": {
     "type": "git",

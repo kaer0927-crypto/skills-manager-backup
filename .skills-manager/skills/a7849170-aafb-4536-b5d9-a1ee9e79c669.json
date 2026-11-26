@@ -5,7 +5,7 @@
   "path_key": "laoyeye",
   "enabled": true,
   "tags": [
-    "技能路由"
+    "提示语技能路由"
   ],
   "source": {
     "type": "git",

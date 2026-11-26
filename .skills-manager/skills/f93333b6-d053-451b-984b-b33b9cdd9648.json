@@ -5,7 +5,7 @@
   "path_key": "solidworks-automation",
   "enabled": true,
   "tags": [
-    "CAD自动化"
+    "SW机械CAD自动化"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "expert-panel",
   "enabled": true,
   "tags": [
-    "专家会诊"
+    "多专家会诊视角"
   ],
   "source": {
     "type": "git",

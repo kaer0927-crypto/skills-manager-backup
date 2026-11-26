@@ -5,7 +5,7 @@
   "path_key": "cangjie-skill",
   "enabled": true,
   "tags": [
-    "拆书成技能"
+    "书籍蒸馏成技能"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "requirements-pipeline",
   "enabled": true,
   "tags": [
-    "需求全流程"
+    "B端需求全流程"
   ],
   "source": {
     "type": "local",

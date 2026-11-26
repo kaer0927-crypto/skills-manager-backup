@@ -5,7 +5,7 @@
   "path_key": "leader",
   "enabled": true,
   "tags": [
-    "目标拆解"
+    "目标拆解任务书"
   ],
   "source": {
     "type": "git",

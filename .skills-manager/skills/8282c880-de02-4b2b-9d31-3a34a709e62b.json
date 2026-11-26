@@ -5,7 +5,7 @@
   "path_key": "socratic-inquiry",
   "enabled": true,
   "tags": [
-    "苏格拉底问诊"
+    "苏格拉底式问诊"
   ],
   "source": {
     "type": "git",

@@ -5,7 +5,7 @@
   "path_key": "prd-writer",
   "enabled": true,
   "tags": [
-    "PRD写作"
+    "七段式PRD写作"
   ],
   "source": {
     "type": "local",

@@ -5,7 +5,7 @@
   "path_key": "inversion",
   "enabled": true,
   "tags": [
-    "逆向排雷"
+    "逆向法排雷防护"
   ],
   "source": {
     "type": "git",

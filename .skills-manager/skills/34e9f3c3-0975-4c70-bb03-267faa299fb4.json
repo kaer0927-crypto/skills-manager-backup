@@ -5,7 +5,7 @@
   "path_key": "no-fluff-output",
   "enabled": true,
   "tags": [
-    "直给输出"
+    "直给输出模式"
   ],
   "source": {
     "type": "git",

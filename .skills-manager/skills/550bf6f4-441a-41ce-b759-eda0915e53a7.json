@@ -5,7 +5,7 @@
   "path_key": "typesafe-ai",
   "enabled": true,
   "tags": [
-    "类型化模型"
+    "类型化决策模型Jev"
   ],
   "source": {
     "type": "git",
