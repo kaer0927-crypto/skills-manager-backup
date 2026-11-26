@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "skill_id": "f93333b6-d053-451b-984b-b33b9cdd9648",
+  "path": "solidworks-automation",
+  "path_key": "solidworks-automation",
+  "enabled": true,
+  "tags": [
+    "SolidWorks CAD 自动化技能"
+  ],
+  "source": {
+    "type": "git",
+    "ref": "https://github.com/wzyn20051216/solidworks-automation-skill",
+    "subpath": null,
+    "branch": null
+  }
+}
